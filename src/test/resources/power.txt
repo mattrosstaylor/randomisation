@@ -1,0 +1,15 @@
+Method: BlockedRandomisation
+Block Size: 15
+Delta: 0
+
+Stratify: practice, waist
+
+Arms: web nurse1 usualcare
+
+Group: practice 4
+Group: waist 2
+
+Group: age
+<20
+20 to 40
+>40

@@ -1,0 +1,56 @@
+<mxGraphModel dx="800" dy="800" grid="1" guides="1" tooltips="1" connect="1" fold="1" page="1" pageScale="1"
+              pageWidth="826" pageHeight="1169" style="default-style2">
+    <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="4"
+                value="&lt;p style=&quot;margin: 0px; margin-top: 4px; text-align: center;&quot;&gt;&lt;strong&gt;&amp;lt;Interface&amp;gt; Strategy&lt;/strong&gt;&lt;/p&gt;&lt;hr /&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;&amp;nbsp;&lt;/p&gt;&lt;hr /&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;&lt;span style=&quot;font-size: 12px;&quot;&gt;+ allocate(TrialDefinition, Participant,&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: #ffffff; font-family: Verdana, Arial, Helvetica, sans-serif;&quot;&gt;DBConnector) : int, atomic&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;&lt;span style=&quot;background-color: #ffffff; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 12px;&quot;&gt;- getData(DBConnector) : List&amp;lt;Object&amp;gt;&lt;/span&gt;&lt;/p&gt;"
+                style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1" parent="1"
+                vertex="1">
+            <mxGeometry x="30" y="30" width="360" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="5"
+                value="&lt;p style=&quot;margin: 0px; margin-top: 4px; text-align: center;&quot;&gt;&lt;strong&gt;&amp;lt;Interface&amp;gt; DBConnector&lt;/strong&gt;&lt;/p&gt;&lt;hr /&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;+ field: Type&lt;/p&gt;&lt;hr /&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;+ connect() : boolean&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;+ disconnect() : boolean&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;+ createTable(TrialDefinition) : boolean&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;+ getCount(TrialDefinition, String attrName, int val) : int&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;+ registerStrategy(String) : boolean&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;+ strategyExists(String) : boolean &amp;nbsp;&lt;/p&gt;"
+                style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1" parent="1"
+                vertex="1">
+            <mxGeometry x="410" y="30" width="310" height="160" as="geometry"/>
+        </mxCell>
+        <mxCell id="7"
+                value="&lt;p style=&quot;margin: 0px; margin-top: 4px; text-align: center;&quot;&gt;&lt;strong&gt;TrialDefinition&lt;/strong&gt;&lt;/p&gt;&lt;hr /&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;&lt;span style=&quot;font-size: 12px;&quot;&gt;- trialName : String&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;&lt;span style=&quot;font-size: 12px;&quot;&gt;- attributes : List&amp;lt;Attribute&amp;gt;&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;&lt;span style=&quot;background-color: #ffffff; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 12px;&quot;&gt;- strategyID : String&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;&lt;span style=&quot;background-color: #ffffff; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 12px;&quot;&gt;- clusterFactor : int&lt;/span&gt;&lt;/p&gt;"
+                style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1" parent="1"
+                vertex="1">
+            <mxGeometry x="30" y="206.25" width="220" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="8"
+                value="&lt;p style=&quot;margin: 0px; margin-top: 4px; text-align: center;&quot;&gt;&lt;strong&gt;Attribute&lt;/strong&gt;&lt;/p&gt;&lt;hr /&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;&lt;span style=&quot;background-color: #ffffff; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 12px;&quot;&gt;- attrName : String&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;&lt;span style=&quot;background-color: #ffffff; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 12px;&quot;&gt;- attrDescr : String&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;&lt;span style=&quot;background-color: #ffffff; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 12px;&quot;&gt;- groupDescr : List&amp;lt;Group&amp;gt;&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;&lt;span style=&quot;background-color: #ffffff; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 12px;&quot;&gt;- weight : float&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;&lt;span style=&quot;background-color: #ffffff; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 12px;&quot;&gt;- isGroupingFactor : boolean&lt;/span&gt;&lt;/p&gt;"
+                style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1" parent="1"
+                vertex="1">
+            <mxGeometry x="30" y="333.5" width="200" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="9"
+                value="&lt;p style=&quot;margin: 0px; margin-top: 4px; text-align: center;&quot;&gt;&lt;strong&gt;Participant&lt;/strong&gt;&lt;/p&gt;&lt;hr /&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;- id : int&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;- responses : List&amp;lt;String, Object&amp;gt;&lt;/p&gt;"
+                style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1" vertex="1"
+                parent="1">
+            <mxGeometry x="500" y="206.25" width="200" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="11"
+                value="&lt;p style=&quot;margin: 0px; margin-top: 4px; text-align: center;&quot;&gt;&lt;strong&gt;Group&lt;/strong&gt;&lt;/p&gt;&lt;hr /&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;- name : String&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;- isRange : boolean&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;- rangeMin : int&lt;/p&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;- rangeMax : int&lt;/p&gt;"
+                style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1" vertex="1"
+                parent="1">
+            <mxGeometry x="305" y="333.5" width="170" height="122.5" as="geometry"/>
+        </mxCell>
+        <mxCell id="12" value="e.g. 'Male' is a group." style="text;spacingTop=-5;" vertex="1" parent="1">
+            <mxGeometry x="320" y="462.5" width="30" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="13" value="e.g. 'What is your gender?' is an attribute." style="text;spacingTop=-5;" vertex="1"
+                parent="1">
+            <mxGeometry x="38" y="466.5" width="30" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="14"
+                value="&lt;p style=&quot;margin: 0px; margin-top: 4px; text-align: center;&quot;&gt;&lt;strong&gt;TrialLoader&lt;/strong&gt;&lt;/p&gt;&lt;hr /&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;&amp;nbsp;&lt;/p&gt;&lt;hr /&gt;&lt;p style=&quot;margin: 0px; margin-left: 4px;&quot;&gt;+ loadTrial(String) : TrialDefinition&lt;/p&gt;"
+                style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1" vertex="1"
+                parent="1">
+            <mxGeometry x="270" y="206.25" width="200" height="87.5" as="geometry"/>
+        </mxCell>
+    </root>
+</mxGraphModel>

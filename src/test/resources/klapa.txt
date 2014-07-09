@@ -1,0 +1,15 @@
+Method: Minimisation
+certainty: 0.8
+
+Arms: web nurse1 usualcare
+
+Group: practice 4
+
+Group: age
+<20
+20 to 40
+>40
+
+Weight: web 1
+Weight: nurse1 1
+Weight: usualcare 1

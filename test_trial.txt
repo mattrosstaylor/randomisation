@@ -1,0 +1,4 @@
+Trial: test
+Allocation strategy: SimpleRandomisation
+
+Arms: one two three

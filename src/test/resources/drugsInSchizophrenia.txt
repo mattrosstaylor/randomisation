@@ -1,0 +1,49 @@
+#Effect on Quality of Life of Second- vs First-Generation Antipsychotic Drugs in Schizophrenia
+
+Method: BlockedRandomisation
+Stratify: sex
+
+Arms: FGA SGA
+
+Limit FGA 500 max
+
+Value: age
+<21
+21 to 40
+41 to 50
+>50
+
+Value: lengthOfIllness
+<2
+2 to 5
+5 to 10
+>10
+
+Value: NumberOfPreviousHospitalAdmissions
+<1
+1 to 2
+3 to 5
+>5
+
+#male, female
+group: sex 2
+
+#white, black or other minority, other
+group: ethnicity 3
+
+#schizophrenia, schizophreniform, schizoaffective disorder, delusional disorder
+group: diagnosis 4
+
+#inpatient, day patient, outpatient
+group: patientStatus 3
+
+#yes, no
+group: currentDrugMisuse 2
+
+#yes, no
+group: currentAlcoholMisuse 2
+
+#Inadequate response, adverse effects, both
+group: referralReason 3
+
+

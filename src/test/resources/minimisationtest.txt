@@ -1,0 +1,8 @@
+Method: Minimisation
+
+Stratify: gender age
+
+Arms: arm1 arm2 arm3
+
+Group: gender 2
+Group: age 5
