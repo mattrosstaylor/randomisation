@@ -1,3 +1,4 @@
-data/
 target/
+main_java_shortcut
 .DS_Store
+*.sh
