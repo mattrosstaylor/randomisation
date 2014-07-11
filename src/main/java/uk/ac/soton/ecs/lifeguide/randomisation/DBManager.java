@@ -5,6 +5,9 @@ package uk.ac.soton.ecs.lifeguide.randomisation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Enumeration;
+
+import com.mysql.jdbc.Driver;
 
 import java.sql.*;
 import java.util.*;
@@ -18,7 +21,7 @@ public class DBManager implements DBConnector {
     private static final String PROTOCOL = "jdbc:mysql:";
     private String PW = "";
     private String UN = "root";
-    private String DB_SERVER_IP = "127.0.0.1";
+    private String DB_SERVER_IP = "localhost";
     private String DB_NAME = "randomisation";
 
     private LifeGuideAPI lifeGuideAPI;
@@ -140,6 +143,8 @@ public class DBManager implements DBConnector {
     @Override
     public boolean connect() {
         try {
+            new Driver(); // mrt - this is maaaaagic
+
             conn = DriverManager.getConnection(PROTOCOL + "//" + DB_SERVER_IP + "/" + DB_NAME, UN, PW);
             return true;
         } catch (SQLException e) {

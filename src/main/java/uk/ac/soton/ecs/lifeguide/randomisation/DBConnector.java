@@ -20,6 +20,7 @@ import java.util.Set;
  */
 
 public interface DBConnector {
+
     /**
      * Attempts to instantiates a connection to the data resource.
      * A useful abstraction for remote storage such as data bases or access trough the web.

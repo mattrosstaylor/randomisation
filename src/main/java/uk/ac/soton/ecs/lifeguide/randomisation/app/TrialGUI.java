@@ -177,6 +177,7 @@ public class TrialGUI {
 
         // Error panel
         errorPanel = new ErrorPanel(frame);
+        //tabbedPane.addTab("erirs", errorPanel);
 
         // Finalise the setup, creating the window.
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

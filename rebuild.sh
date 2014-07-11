@@ -1,4 +1,3 @@
 #!/bin/bash
-
+figlet REBUILD
 mvn package
-java -jar target/randomisation-1.0.jar

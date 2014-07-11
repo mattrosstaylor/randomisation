@@ -22,23 +22,23 @@
             <!--  Builds and executable jar with all the dependencies packaged inside-->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+		<version>2.4</version>
                 <configuration>
-                    <appendAssemblyId>false</appendAssemblyId>
                     <archive>
                         <manifest>
-                            <mainClass>uk.ac.soton.ecs.lifeguide.randomisation.app.TrialGUI</mainClass>
+                            <mainClass>uk.ac.soton.ecs.lifeguide.randomisation.CommandLineAPI</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <attach>false</attach>
                 </configuration>
                 <executions>
                     <execution>
                         <id>make-assembly</id>
-                        <!-- this is used for inheritance merges -->
                         <phase>package</phase>
-                        <!-- bind to the packaging phase -->
                         <goals>
                             <goal>single</goal>
                         </goals>
@@ -52,7 +52,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.12.4</version>
                 <configuration>
-                    <skipTests>true</skipTests>
+                 <skipTests>true</skipTests>
                 </configuration>
             </plugin>
         </plugins>
