@@ -111,9 +111,11 @@ public class TrialLoader{
 						if (strategyClass.equals(Strategy.class)) {
 							throw new ClassNotFoundException();
 						}
-					} catch (ClassNotFoundException e) {
+					}
+					catch (ClassNotFoundException e) {
 						throw new InvalidTrialException("Allocation method not found: " + strategyName + ".", lineNum);
-					} catch (ClassCastException e) {
+					}
+					catch (ClassCastException e) {
 						throw new InvalidTrialException("Allocation method not found: " + strategyName + ".", lineNum);
 					}
 				}

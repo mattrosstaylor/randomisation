@@ -17,7 +17,7 @@
     </properties>
 
     <build>
-
+	<finalName>${project.name}</finalName>
         <plugins>
             <!--  Builds and executable jar with all the dependencies packaged inside-->
             <plugin>
@@ -87,14 +87,17 @@
 
         <!-- On-board DB dependency -->
         <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-            <version>10.10.1.1</version>
-        </dependency>
-        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.26</version>
         </dependency>
+
+	<!-- JSON for command line API -->
+	<dependency>
+		<groupId>org.json</groupId>
+		<artifactId>json</artifactId>
+		<version>20140107</version>
+	</dependency>
+
     </dependencies>
 </project>

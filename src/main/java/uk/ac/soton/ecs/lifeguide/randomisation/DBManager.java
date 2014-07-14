@@ -3,16 +3,15 @@
 
 package uk.ac.soton.ecs.lifeguide.randomisation;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.util.Enumeration;
-
-import com.mysql.jdbc.Driver;
-
+import com.mysql.jdbc.Driver; // mrt - lololololol
 import java.sql.*;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.ac.soton.ecs.lifeguide.randomisation.exception.*;
 
-public class DBManager implements DBConnector {
+
+public class DBManager {
     private static final Logger logger = LoggerFactory.getLogger(DBManager.class);
 
     private Connection conn = null;
@@ -23,6 +22,8 @@ public class DBManager implements DBConnector {
     private String UN = "root";
     private String DB_SERVER_IP = "localhost";
     private String DB_NAME = "randomisation";
+
+    private static final String STRATEGY_CLASS_PACKAGE = "uk.ac.soton.ecs.lifeguide.randomisation.";
 
     private LifeGuideAPI lifeGuideAPI;
 
@@ -51,8 +52,8 @@ public class DBManager implements DBConnector {
         db_schema.put("RESPONSE",
                 " (id INT AUTO_INCREMENT PRIMARY KEY, value FLOAT NOT NULL, parameter_name VARCHAR(255) NOT NULL, participant_id INT NOT NULL, time_stamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, trial_definition_id INT NOT NULL )");
 
-        db_schema.put("STRATEGY",
-                "(name VARCHAR(255) PRIMARY KEY, class_name VARCHAR(255) )");
+        /*db_schema.put("STRATEGY",
+                "(name VARCHAR(255) PRIMARY KEY, class_name VARCHAR(255) )"); */
 
         db_schema.put("PARTICIPANT",
                 " (id INT AUTO_INCREMENT PRIMARY KEY, given_id INT, treatment_id INT )");
@@ -77,13 +78,13 @@ public class DBManager implements DBConnector {
     /**
      * A convenience method for getting the id of a particular {@link TrialDefinition} object, given its name.
      *
-     * @param name The name of the trial definition
+     * @param trialName The name of the trial definition
      * @return An integer representing the id key of this trial definition in the database
      * @throws SQLException
      */
-    public int getTrialDefinitionId(String name) throws SQLException {
+    public int getTrialDefinitionId(String trialName) throws SQLException {
         PreparedStatement pst = conn.prepareStatement("SELECT id FROM INTERVENTION WHERE trial_name = ?");
-        pst.setString(1, name);
+        pst.setString(1, trialName);
         pst.executeQuery();
 
         ResultSet rs = pst.getResultSet();
@@ -101,7 +102,7 @@ public class DBManager implements DBConnector {
      * @return Returns true if the required schema exists in the database
      * @throws SQLException
      */
-    public boolean checkTablesExist() throws SQLException {
+    private boolean checkTablesExist() throws SQLException {
         DatabaseMetaData dbmdata = conn.getMetaData();
         ResultSet res = dbmdata.getTables(null, null, null, new String[]{"TABLE"});
         HashSet<String> tables = new HashSet<String>();
@@ -116,7 +117,7 @@ public class DBManager implements DBConnector {
      *
      * @throws SQLException
      */
-    public void createTables() throws SQLException {
+    private void createTables() throws SQLException {
         for (String s : db_schema.keySet()) {
             if (createTable(s, db_schema.get(s))) {
                 logger.debug("Created table " + s);
@@ -130,59 +131,44 @@ public class DBManager implements DBConnector {
      * @return Returns true if the table was successfully created.
      * @throws SQLException
      */
-    public boolean createTable(String tblName, String specs) throws SQLException {
+    private boolean createTable(String tblName, String specs) throws SQLException {
         Statement statement = conn.createStatement();
         return statement.execute("CREATE TABLE " + tblName + specs);
     }
 
     /**
      * Connects to the database.
-     *
-     * @return Returns true if connection was successful, false otherwise.
      */
-    @Override
-    public boolean connect() {
+    public void connect() throws PersistenceException {
         try {
-            new Driver(); // mrt - this is maaaaagic
-
+            new Driver(); // mrt - this is maaaaagic and you have to do this in order to register the Driver
             conn = DriverManager.getConnection(PROTOCOL + "//" + DB_SERVER_IP + "/" + DB_NAME, UN, PW);
-            return true;
-        } catch (SQLException e) {
-            logger.error(e.getMessage());  //To change body of catch statement use File | Settings | File Templates.
+
+            // initialise databse
+            if (!checkTablesExist()) {
+                createTables();
+                logger.info("Created database.");
+            }
+        } 
+        catch (SQLException e) {
+            throw new PersistenceException("Error initialising database.", e);
         }
-        return false;
     }
 
     /**
      * Wrapper for calling the {@link #closeDB()}  method.
      *
-     * @return Returns true if disconnecting from the database was successful.
+     * @throws PersistenceException
      */
-    @Override
-    public boolean disconnect() {
+    public void disconnect() throws PersistenceException {
         try {
-            closeDB();
-            return true;
-        } catch (SQLException e) {
-            if (e.getErrorCode() == 50000 && "XJ015".equals(e.getSQLState())) {
-                return true;
+            if (conn != null) {
+                conn.close();
+                conn = null;
             }
-            logger.error(e.getMessage());
         }
-        return false;
-    }
-
-    /**
-     * Closes the connection to the database engine.
-     *
-     * @throws SQLException
-     */
-    private void closeDB() throws SQLException {
-        DriverManager.getConnection("jdbc:derby:" + ";shutdown=true"); //removing the name will shutdown the DB engine, this only closes this database
-
-        if (conn != null) {
-            conn.close();
-            conn = null;
+        catch (SQLException e) {
+            throw new PersistenceException("Error closing database", e);
         }
     }
 
@@ -190,10 +176,9 @@ public class DBManager implements DBConnector {
      * Registers a new TrialDefinition object in the database.
      *
      * @param trialDefinition The trial definition to be registered.
-     * @return Returns true if successful.
+     * @throws PersistenceException
      */
-    @Override
-    public boolean registerTrial(TrialDefinition trialDefinition) {
+    public void registerTrial(TrialDefinition trialDefinition) throws PersistenceException {
         try {
             PreparedStatement trialInsertStmt = conn.prepareStatement("INSERT INTO INTERVENTION(trial_name, strategy_id, cluster_factors) VALUES(?,?,?)", Statement.RETURN_GENERATED_KEYS);
             PreparedStatement insertGroupStmt = conn.prepareStatement("INSERT INTO GROUPS(attribute_id , name, range_min, range_max) VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
@@ -213,8 +198,8 @@ public class DBManager implements DBConnector {
             int trial_id = -1;
 
             generatedIds = trialInsertStmt.getGeneratedKeys();
-            if (!generatedIds.next() || generatedIds == null) {
-                return false;
+            if (!generatedIds.next()) {
+                throw new PersistenceException("Could not access AUTO_INCREMENT values"); // mrt - this is probably unreachable code
             }
 
             generated_id = generatedIds.getLong(1);
@@ -231,8 +216,8 @@ public class DBManager implements DBConnector {
 
                 generatedIds = insertAttributeStmt.getGeneratedKeys();
 
-                if (!generatedIds.next() || generatedIds == null) {
-                    return false;
+                if (!generatedIds.next()) {
+                    throw new PersistenceException("Could not access AUTO_INCREMENT values"); // mrt - this is probably unreachable code
                 }
                 generated_id = generatedIds.getLong(1);
 
@@ -277,26 +262,27 @@ public class DBManager implements DBConnector {
                 insertParams.setInt(3, (int) trial_id);
                 insertParams.executeUpdate();
             }
-            return true;
-        } catch (SQLIntegrityConstraintViolationException e) {
-            logger.error(e.getMessage());
-        } catch (SQLException e) {
-            logger.error(e.getMessage());
         }
-        return false;
+
+        // mrt - this needs more testing before I can really determine what the failure cases are
+        catch (SQLIntegrityConstraintViolationException e) {
+            throw new PersistenceException("Could not register trial", e);
+        } 
+        catch (SQLException e) {
+            throw new PersistenceException("Could not register trial", e);
+        }
     }
 
     /**
-     * Checks the database to determine whether the given trial definition exists.
+     * Checks the database to determine whether a trial with the given name exists.
      *
-     * @param trialDefinition The object whose existence on the data resource to be checked.
+     * @param trialName
      * @return Returns true if the trial definition exists.
      */
-    @Override
-    public boolean trialExists(TrialDefinition trialDefinition) {
+    public boolean trialExists(String trialName) {
         try {
             PreparedStatement st = conn.prepareStatement("SELECT trial_name FROM INTERVENTION WHERE trial_name=?");
-            st.setString(1, trialDefinition.getTrialName());
+            st.setString(1, trialName);
             st.executeQuery();
 
             ResultSet rs = st.getResultSet();
@@ -304,8 +290,9 @@ public class DBManager implements DBConnector {
             if (rs != null && rs.next()) {
                 return true;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        }
+        catch (SQLException e) {
+            e.printStackTrace(); // mrt - this will probably never happen....
         }
         return false;
     }
@@ -318,7 +305,6 @@ public class DBManager implements DBConnector {
      * @param args
      * @return number of participants matching
      */
-    @Override
     public int getCount(TrialDefinition trialDefinition, Map<String, Integer> args) {
 
         int count = 0;
@@ -379,7 +365,6 @@ public class DBManager implements DBConnector {
      * @param trialDefinition The trial object for which the statics should be returned
      * @return The strategyStatistics object corresponding to this participant's treatment group for this trial.
      */
-    @Override
     public Statistics getStrategyStatistics(TrialDefinition trialDefinition) throws SQLException {
         Statistics strategyStats = new StrategyStatistics();
 
@@ -411,7 +396,6 @@ public class DBManager implements DBConnector {
      * @param treatment          The treatment allocation arm that the patient have been assigned to.
      * @return Returns true if operation was successful.
      */
-    @Override
     public boolean update(TrialDefinition trialDefinition, Participant participant,
                           Statistics strategyStatistics, int treatment) throws SQLException {
         try {
@@ -452,57 +436,6 @@ public class DBManager implements DBConnector {
 
     }
 
-    /**
-     * Register a new allocation strategy to the database.
-     *
-     * @param strategyName The name of the strategy
-     * @param className    The strategy fully qualified class name to be registered for the given simple name.
-     * @return Returns true if successful.
-     */
-    @Override
-    public boolean registerStrategy(String strategyName, String className) {
-        try {
-            PreparedStatement ps = conn.prepareStatement("INSERT INTO STRATEGY(name, class_name) VALUES( ?,?)");
-            ps.setString(1, strategyName);
-            ps.setString(2, className);
-
-            if (ps.executeUpdate() > 0) {
-                return true;
-            }
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            logger.error("DBManager : registerStrategy", e.getMessage());
-        }
-        return false;
-    }
-
-    /**
-     * Queries the database to find if a specified strategy exists.
-     *
-     * @param strategy The strategy name which to look for (this is not the fully qualified class name)
-     * @return Returns true if strategy is found in the database.
-     */
-    @Override
-    public boolean strategyExists(String strategy) {
-        try {
-            PreparedStatement ps = conn.prepareStatement("SELECT name FROM STRATEGY WHERE name = ?");
-            ps.setString(1, strategy);
-            ps.executeQuery();
-
-            ResultSet rs = ps.getResultSet();
-            if (rs != null && rs.next()) {
-                return true;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-
-        return false;
-    }
-
-    @Override
     public void setLifeGuideAPI(LifeGuideAPI lifeGuideAPI) {
         this.lifeGuideAPI = lifeGuideAPI;
     }
@@ -513,7 +446,6 @@ public class DBManager implements DBConnector {
      * @param id The numerical id of the participant required.
      * @return A participant object
      */
-    @Override
     public Participant getParticipant(int id) {
         return lifeGuideAPI.getParticipant(id);
     }
@@ -524,40 +456,54 @@ public class DBManager implements DBConnector {
      * @param name The name of the trial definition.
      * @return Returns a {@link TrialDefinition} object, if it exists in the database.
      */
-    @Override
-    public TrialDefinition getTrialDefinition(String name) throws SQLException, ClassNotFoundException {
-        TrialDefinition definition = null;
-        PreparedStatement definitionStmt = conn.prepareStatement("SELECT id,strategy_id,cluster_factors FROM INTERVENTION WHERE trial_name = ?");
-        definitionStmt.setString(1, name);
-        definitionStmt.executeQuery();
+    public TrialDefinition getTrialDefinition(String trialName) throws PersistenceException, InvalidTrialException {
+        try {
+            TrialDefinition definition = null;
+            PreparedStatement definitionStmt = conn.prepareStatement("SELECT id,strategy_id,cluster_factors FROM INTERVENTION WHERE trial_name = ?");
+            definitionStmt.setString(1, trialName);
+            definitionStmt.executeQuery();
 
-        ResultSet results = definitionStmt.getResultSet();
-        if (results != null && results.next()) {
-            int trialId = results.getInt("id");
+            ResultSet results = definitionStmt.getResultSet();
+            if (results != null && results.next()) {
+                int trialId = results.getInt("id");
 
-            ArrayList<Treatment> treatments = getTreatments(trialId);
-            ArrayList<Attribute> attributes = getAttributes(trialId);
-            HashMap<String, Float> definitionParameters = getParameters(trialId);
+                ArrayList<Treatment> treatments = getTreatments(trialId);
+                ArrayList<Attribute> attributes = getAttributes(trialId);
+                HashMap<String, Float> definitionParameters = getParameters(trialId);
 
-            String[] cFString = results.getString("cluster_factors").split(",");
-            int[] clusterFactors = new int[cFString.length];
-            for (int i = 0; i < cFString.length; i++) {
-                clusterFactors[i] = Integer.parseInt(cFString[i]);
+                String[] cFString = results.getString("cluster_factors").split(",");
+                int[] clusterFactors = new int[cFString.length];
+                for (int i = 0; i < cFString.length; i++) {
+                    clusterFactors[i] = Integer.parseInt(cFString[i]);
+                }
+
+                String strategyName = results.getString("strategy_id");
+                Class<? extends Strategy> c;
+
+                try {
+                    c  = Class.forName(STRATEGY_CLASS_PACKAGE+strategyName).asSubclass(Strategy.class);
+                }
+                catch (ClassNotFoundException e) {
+                    throw new InvalidTrialException("Allocation method not found: " + strategyName);
+                }
+                catch (ClassCastException e) {
+                    throw new InvalidTrialException("Allocation method not found: " + strategyName);
+                }
+
+                definition = new TrialDefinition(
+                        trialName,
+                        c,
+                        results.getString("strategy_id"),
+                        definitionParameters,
+                        attributes,
+                        treatments,
+                        clusterFactors);
             }
-
-            HashMap<String, String> strategyMap = getStrategyDetails(results.getString("strategy_id"));
-            Class<? extends Strategy> c = Class.forName("uk.ac.soton.ecs.lifeguide.randomisation."+strategyMap.get(results.getString("strategy_id"))).asSubclass(Strategy.class);
-
-            definition = new TrialDefinition(
-                    name,
-                    c,
-                    results.getString("strategy_id"),
-                    definitionParameters,
-                    attributes,
-                    treatments,
-                    clusterFactors);
+            return definition;
         }
-        return definition;
+        catch (SQLException e) {
+            throw new PersistenceException("Could not load trial: " +trialName, e);
+        }
     }
 
     /**
@@ -565,7 +511,6 @@ public class DBManager implements DBConnector {
      *
      * @return Returns a {@link ArrayList} object with the names of the trial definition in the database.
      */
-    @Override
     public Set<String> getTrialDefinitionNames() {
         HashSet<String> names = new HashSet<String>();
         try {
@@ -578,28 +523,6 @@ public class DBManager implements DBConnector {
         } catch (SQLException e) {
         }
         return names;
-    }
-
-    /**
-     * Fetches from the database all the details known for a given strategy
-     *
-     * @param name The name of the strategy
-     * @return A HashMap object with strategyName => fullyQualifiedClassName for a given strategy
-     * @throws SQLException
-     */
-    private HashMap<String, String> getStrategyDetails(String name) throws SQLException {
-        HashMap<String, String> resultMap = new HashMap<String, String>();
-
-        PreparedStatement strategyStmt = conn.prepareStatement("SELECT class_name FROM STRATEGY WHERE name = ?");
-        strategyStmt.setString(1, name);
-        strategyStmt.executeQuery();
-
-        ResultSet res = strategyStmt.getResultSet();
-        if (res != null && res.next()) {
-            resultMap.put(name, res.getString("class_name"));
-        }
-
-        return resultMap;
     }
 
     /**

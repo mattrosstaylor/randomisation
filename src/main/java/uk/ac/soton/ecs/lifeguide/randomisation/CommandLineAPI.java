@@ -1,74 +1,107 @@
 package uk.ac.soton.ecs.lifeguide.randomisation;
 
 import uk.ac.soton.ecs.lifeguide.randomisation.exception.*;
-import java.sql.SQLException;
 
+import java.io.*;
+import java.sql.*;
+import java.util.*;
+
+import org.json.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CommandLineAPI {
 
+	public static final String REGISTER_TRIAL = "register_trial";
+	public static final String ADD_PARTICIPANT = "add_participant";
+	public static final String COMMAND_FAILURE = "failure";
+	public static final String COMMAND_SUCCESS = "success";
+
 	private static final Logger logger = LoggerFactory.getLogger(CommandLineAPI.class);
 	private DBManager database;
 
 
-	public static void main(String[] args) {
+	private static String stackTraceToString(Throwable t) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		t.printStackTrace(pw);
+		return sw.toString();
+	}
 
+	public static void main(String[] args) {
 		CommandLineAPI api = new CommandLineAPI();
 		try {
+			if (args.length == 0) {
+				throw new BadCommandException("No parameters given.");
+			}
 			api.connectDatabase();
-			api.registerTrial("test_trial.txt");
+
+			if (args[0].equals(REGISTER_TRIAL)) {
+				if (args.length != 3) {
+					throw new BadCommandException("Usage: " +REGISTER_TRIAL +" trial_name definition_path");
+				}
+				api.registerTrial(args[1], args[2]);
+			}
+
+			if (args[0].equals(ADD_PARTICIPANT)) {
+				if (args.length != 4) {
+					throw new BadCommandException("Usage: " + ADD_PARTICIPANT +" trial_name user_identifier data_path");
+				}
+				api.addParticipant(args[1], args[2], args[3]);
+			}
 
 			api.disconnectDatabase();
 		}
 		catch (Exception e) {
-			logger.error(e.getMessage());
+			String s = stackTraceToString(e);
+			logger.error(s);
+
+			JSONObject json = new JSONObject();
+			json.put("status", COMMAND_FAILURE);
+			json.put("command", Arrays.toString(args));
+			json.put("message", e.getClass().getSimpleName() +": " +e.getMessage());
+			json.put("full_stack", s);
+			System.out.println(json.toString());
 		}
 	}
 
-	public void connectDatabase() throws SQLException {
+	public void connectDatabase() throws PersistenceException {
+		
 		database = new DBManager("root", "", "randomisation", "127.0.0.1");
-		// mrt - returning true or false for critical failure cases? 
-		// what the fuck is this? C coding????
-		if (database.connect()) {
-			if (!database.checkTablesExist()) {
-				database.createTables();
-				logger.info("Created database.");
-			}
-		}
-		else {
-			// this already got "logged" in the connect method
-			throw new Error("FUUUUUCK YOOOOOOOU");
-		}
+		database.connect();
 	}
 
-	public void disconnectDatabase() {
+	public void disconnectDatabase() throws PersistenceException {
 		database.disconnect();
 	}
 
 	/* study functions */
-	public void registerTrial(String definitionPath) {
-		logger.info("Register trial: " +definitionPath);
+	public void registerTrial(String trialName, String definitionPath) throws PersistenceException, InvalidTrialException {
+		
+		TrialDefinition trial = TrialLoader.loadTrial(definitionPath);
+		trial.setTrialName(trialName);
 
-		try {
-			TrialDefinition trial = TrialLoader.loadTrial(definitionPath);
+		if (!database.trialExists(trialName)) {
+			database.registerTrial(trial);
+			// mrt - do success message
 		}
-		catch (InvalidTrialException e) {
-			logger.error(e.getMessage());
+		else {
+			throw new PersistenceException("Trial with name " +trialName +" already exists.");
 		}
 	}
 
 	public void deleteTrial(String trialId) {
 		logger.error("Deleting a trial is currently unsupported");
-	}
-
-	public void showStudyInfo(String trialId) {
-		logger.info("showTrialInfo: " +trialId);	
+		// mrt - looks at existing database code and weeps
 	}
 
 	/* participant functions */
-	public void addParticipant(String trialId, String participantId, String data) {
-		logger.info("addParticipant: " +trialId +" " +participantId);
+	public void addParticipant(String trialName, String participantIdentifier, String dataPath) throws PersistenceException, InvalidTrialException {
+		if (!database.trialExists(trialName)) {
+			throw new PersistenceException("No such trial: "+ trialName);
+		}
+
+		TrialDefinition trial = database.getTrialDefinition(trialName);
 	}
 
 	public void removeParticipant(String trialId, String participantId) {
