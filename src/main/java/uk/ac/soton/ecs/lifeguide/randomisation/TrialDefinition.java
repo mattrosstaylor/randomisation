@@ -122,13 +122,15 @@ public class TrialDefinition {
     }
 
     public int getDefaultTreatmentIndex() {
-        if (defaultTreatment == null)
+        if (defaultTreatment == null) {
             return -1;
+        }
 
         int index = -1;
         for (int i = 0; i < treatments.size(); ++i) {
-            if (treatments.get(i).equals(defaultTreatment))
+            if (treatments.get(i).equals(defaultTreatment)) {
                 index = i;
+            }
         }
 
         return index;
@@ -137,23 +139,25 @@ public class TrialDefinition {
     /**
      * @return Whether or not this trial has any cluster factors.
      */
-    public boolean isClustered() {
+    private boolean isClustered() { // mrt - cluster factors are never used
         return clusterFactors != null && clusterFactors.length > 0;
     }
 
-    public List<Attribute> getClusterFactors() {
+    private List<Attribute> getClusterFactors() { // mrt - cluster factors are never used
         if (isClustered()) {
             List<Attribute> clusterAttributes = new ArrayList<Attribute>();
-            for (Integer i : clusterFactors)
+            for (Integer i : clusterFactors) {
                 clusterAttributes.add(attributes.get(i));
+            }
             return clusterAttributes;
-        } else {
+        } 
+        else {
             logger.warn("Requested cluster factors for " + trialName + ", but no cluster factors exist.");
             return new ArrayList<Attribute>();
         }
     }
 
-    public int[] getClusterIndices() {
+    private int[] getClusterIndices() { // mrt - cluster factors are never used
         return clusterFactors;
     }
 
@@ -173,7 +177,7 @@ public class TrialDefinition {
         this.strategyID = id;
     }
 
-    public void setClusterFactors(int[] attributeIndices) {
+    private void setClusterFactors(int[] attributeIndices) { // mrt - cluster factors are never used
         this.clusterFactors = attributeIndices;
     }
 
@@ -227,24 +231,28 @@ public class TrialDefinition {
         output += "Allocation strategy: " + strategyID;
         if (getParamCount() > 0) {
             output += "\n\nParameters:";
-            for (String key : strategyParams.keySet())
+            for (String key : strategyParams.keySet()) {
                 output += "\n" + key + " = " + strategyParams.get(key);
+            }
         }
-        output += "\n\nClustered?: " + readableBoolean(isClustered());
+/*        output += "\n\nClustered?: " + readableBoolean(isClustered());
         if (isClustered()) {
             output += "\nCluster factors:";
             List<Attribute> clusterAttributes = getClusterFactors();
             for (Attribute attr : clusterAttributes)
                 output += " " + attr.getAttributeName();
-        }
+        } */ // mrt - cluster factors are never used
         output += "\n\nAttributes: ";
-        for (Attribute attr : attributes)
+        for (Attribute attr : attributes) {
             output += "\n" + attr;
+        }
         output += "\n\nTreatments: ";
-        for (Treatment treatment : treatments)
+        for (Treatment treatment : treatments) {
             output += "\n" + treatment;
-        if (defaultTreatment != null)
+        }
+        if (defaultTreatment != null) {
             output += "\nDefault treatment: " + defaultTreatment.getName();
+        }
         return output;
     }
 
@@ -275,9 +283,11 @@ public class TrialDefinition {
      */
     public int getStratifiedCount() {
         int stratifiedCount = 1;
-        for (Attribute attribute : attributes)
-            if (attribute.isGroupingFactor() == true)
+        for (Attribute attribute : attributes) {
+            if (attribute.isGroupingFactor() == true) {
                 stratifiedCount *= attribute.getGroupCount();
+            }
+        }
         return stratifiedCount;
     }
 
@@ -301,8 +311,9 @@ public class TrialDefinition {
                 count -= val * total;
 
                 // Prefix each subsequent group with a comma.
-                if (firstStratGroupFound)
+                if (firstStratGroupFound) {
                     stratString += ", ";
+                }
                 firstStratGroupFound = true;
 
                 stratString += attribute.getAttributeName() + " " + val;

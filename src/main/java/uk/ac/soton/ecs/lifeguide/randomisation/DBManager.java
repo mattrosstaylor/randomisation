@@ -47,7 +47,7 @@ public class DBManager {
      */
     private void initHashMap() {
         db_schema.put("INTERVENTION",
-                " (id INT AUTO_INCREMENT PRIMARY KEY, trial_name VARCHAR(255) UNIQUE NOT NULL, strategy_id VARCHAR(255) NOT NULL, cluster_factors VARCHAR(255) NOT NULL)");
+                " (id INT AUTO_INCREMENT PRIMARY KEY, trial_name VARCHAR(255) UNIQUE NOT NULL, strategy VARCHAR(255) NOT NULL, cluster_factors VARCHAR(255) NOT NULL)");
 
         db_schema.put("RESPONSE",
                 " (id INT AUTO_INCREMENT PRIMARY KEY, value FLOAT NOT NULL, parameter_name VARCHAR(255) NOT NULL, participant_id INT NOT NULL, time_stamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, trial_definition_id INT NOT NULL )");
@@ -180,7 +180,7 @@ public class DBManager {
      */
     public void registerTrial(TrialDefinition trialDefinition) throws PersistenceException {
         try {
-            PreparedStatement trialInsertStmt = conn.prepareStatement("INSERT INTO INTERVENTION(trial_name, strategy_id, cluster_factors) VALUES(?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement trialInsertStmt = conn.prepareStatement("INSERT INTO INTERVENTION(trial_name, strategy, cluster_factors) VALUES(?,?,?)", Statement.RETURN_GENERATED_KEYS);
             PreparedStatement insertGroupStmt = conn.prepareStatement("INSERT INTO GROUPS(attribute_id , name, range_min, range_max) VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
             PreparedStatement insertAttributeStmt = conn.prepareStatement("INSERT INTO ATTRIBUTE(trial_definition_id , attr_name, weight, grouping_factor, num_groups) VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
             PreparedStatement insertTreatmentStmt = conn.prepareStatement("INSERT INTO TREATMENT(name, weight , max_Participants, participant_limit, trial_definition_id) VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
@@ -190,7 +190,7 @@ public class DBManager {
             trialInsertStmt.clearParameters();
             trialInsertStmt.setString(1, trialDefinition.getTrialName());
             trialInsertStmt.setString(2, trialDefinition.getStrategyID());
-            trialInsertStmt.setString(3, joinArray(trialDefinition.getClusterIndices(), ","));
+            trialInsertStmt.setString(3, "" /*joinArray(trialDefinition.getClusterIndices(), ",") */ ); // mrt - what the fuck are cluster factors
             trialInsertStmt.executeUpdate();
 
             ResultSet generatedIds = null;
@@ -459,7 +459,7 @@ public class DBManager {
     public TrialDefinition getTrialDefinition(String trialName) throws PersistenceException, InvalidTrialException {
         try {
             TrialDefinition definition = null;
-            PreparedStatement definitionStmt = conn.prepareStatement("SELECT id,strategy_id,cluster_factors FROM INTERVENTION WHERE trial_name = ?");
+            PreparedStatement definitionStmt = conn.prepareStatement("SELECT id, strategy, cluster_factors FROM INTERVENTION WHERE trial_name = ?");
             definitionStmt.setString(1, trialName);
             definitionStmt.executeQuery();
 
@@ -471,13 +471,20 @@ public class DBManager {
                 ArrayList<Attribute> attributes = getAttributes(trialId);
                 HashMap<String, Float> definitionParameters = getParameters(trialId);
 
-                String[] cFString = results.getString("cluster_factors").split(",");
-                int[] clusterFactors = new int[cFString.length];
-                for (int i = 0; i < cFString.length; i++) {
-                    clusterFactors[i] = Integer.parseInt(cFString[i]);
+                int[] clusterFactors;
+                
+                if (results.getString("cluster_factors").trim().equals("")) {
+                    clusterFactors = new int[0];
+                }
+                else {
+                    String[] cFString = results.getString("cluster_factors").split(",");
+                    clusterFactors = new int[cFString.length];
+                    for (int i = 0; i < cFString.length; i++) {
+                        clusterFactors[i] = Integer.parseInt(cFString[i]);
+                    }
                 }
 
-                String strategyName = results.getString("strategy_id");
+                String strategyName = results.getString("strategy");
                 Class<? extends Strategy> c;
 
                 try {
@@ -493,7 +500,7 @@ public class DBManager {
                 definition = new TrialDefinition(
                         trialName,
                         c,
-                        results.getString("strategy_id"),
+                        strategyName,
                         definitionParameters,
                         attributes,
                         treatments,

@@ -102,6 +102,7 @@ public class CommandLineAPI {
 		}
 
 		TrialDefinition trial = database.getTrialDefinition(trialName);
+		logger.debug(trial.toString());
 	}
 
 	public void removeParticipant(String trialId, String participantId) {
