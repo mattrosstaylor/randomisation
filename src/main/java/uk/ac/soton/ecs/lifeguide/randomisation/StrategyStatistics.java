@@ -15,25 +15,25 @@ import java.util.Set;
 
 public class StrategyStatistics implements Statistics {
 
-    private Map<String, Float> statistics;
+	private Map<String, Float> statistics;
 
-    public StrategyStatistics(Map<String, Float> statistics) {
-        this.statistics = statistics;
-    }
+	public StrategyStatistics(Map<String, Float> statistics) {
+		this.statistics = statistics;
+	}
 
-    public StrategyStatistics() {
-        statistics = new HashMap<String, Float>();
-    }
+	public StrategyStatistics() {
+		statistics = new HashMap<String, Float>();
+	}
 
-    public void putStatistic(String name, Float value) {
-        statistics.put(name, value);
-    }
+	public void putStatistic(String name, Float value) {
+		statistics.put(name, value);
+	}
 
-    public Float getStatistic(String name) {
-        return statistics.get(name);
-    }
+	public Float getStatistic(String name) {
+		return statistics.get(name);
+	}
 
-    public Set<String> getAllNames() {
-        return statistics.keySet();
-    }
+	public Set<String> getAllNames() {
+		return statistics.keySet();
+	}
 }

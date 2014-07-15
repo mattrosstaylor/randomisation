@@ -12,9 +12,9 @@ import java.util.Set;
  */
 
 public interface Statistics {
-    public void putStatistic(String name, Float value);
+	public void putStatistic(String name, Float value);
 
-    public Float getStatistic(String name);
+	public Float getStatistic(String name);
 
-    public Set<String> getAllNames();
+	public Set<String> getAllNames();
 }

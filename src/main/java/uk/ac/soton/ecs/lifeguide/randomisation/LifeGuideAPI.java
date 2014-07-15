@@ -12,10 +12,10 @@ package uk.ac.soton.ecs.lifeguide.randomisation;
  * @since 1.7
  */
 public interface LifeGuideAPI {
-    /**
-     * @param id The id of the participant who is about to be retrieved
-     * @return A {@link Participant} object constructed from the data retrieved from the LifeGuide database.
-     * @throws IllegalArgumentException if a participant with the given id does not exist.
-     */
-    public Participant getParticipant(int id) throws IllegalArgumentException;
+	/**
+	 * @param id The id of the participant who is about to be retrieved
+	 * @return A {@link Participant} object constructed from the data retrieved from the LifeGuide database.
+	 * @throws IllegalArgumentException if a participant with the given id does not exist.
+	 */
+	public Participant getParticipant(int id) throws IllegalArgumentException;
 }

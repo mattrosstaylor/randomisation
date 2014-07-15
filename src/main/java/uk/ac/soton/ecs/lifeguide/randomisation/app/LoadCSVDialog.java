@@ -13,59 +13,59 @@ import java.util.List;
 
 public class LoadCSVDialog implements ActionListener {
 
-    private JComponent parent;
-    private LocalDBConnector database;
-    private TrialChangeDistributor notifier;
+	private JComponent parent;
+	private LocalDBConnector database;
+	private TrialChangeDistributor notifier;
 
-    public LoadCSVDialog(JComponent parent, LocalDBConnector database, TrialChangeDistributor notifier) {
-        this.parent = parent;
-        this.database = database;
-        this.notifier = notifier;
-    }
+	public LoadCSVDialog(JComponent parent, LocalDBConnector database, TrialChangeDistributor notifier) {
+		this.parent = parent;
+		this.database = database;
+		this.notifier = notifier;
+	}
 
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getID() != ActionEvent.ACTION_PERFORMED)
-            return;
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		if (event.getID() != ActionEvent.ACTION_PERFORMED)
+			return;
 
-        JFileChooser fileBrowser = new JFileChooser(notifier.getCurrentDirectory());
+		JFileChooser fileBrowser = new JFileChooser(notifier.getCurrentDirectory());
 
-        int result = fileBrowser.showOpenDialog(parent);
+		int result = fileBrowser.showOpenDialog(parent);
 
-        if (result == JFileChooser.APPROVE_OPTION) {
-            String filePath = fileBrowser.getSelectedFile().getPath();
-            notifier.setCurrentDirectory(filePath);
+		if (result == JFileChooser.APPROVE_OPTION) {
+			String filePath = fileBrowser.getSelectedFile().getPath();
+			notifier.setCurrentDirectory(filePath);
 
-            String trialName = notifier.getCurrentTrialName();
-            if (!database.trialExists(trialName)) {
-                String errMsg = "You must select a valid trial from the drop-down list above.";
-                TrialGUI.errorPanel.showError(errMsg);
-                return;
-            }
+			String trialName = notifier.getCurrentTrialName();
+			if (!database.trialExists(trialName)) {
+				String errMsg = "You must select a valid trial from the drop-down list above.";
+				TrialGUI.errorPanel.showError(errMsg);
+				return;
+			}
 
-            List<Participant> participants = null;
+			List<Participant> participants = null;
 
-            try {
-                participants = ParticipantLoader.load(filePath);
-            } catch (ParticipantLoadException e) {
-                TrialGUI.errorPanel.showError(e.getMessage() + " Participants have not been allocated.");
-            }
+			try {
+				participants = ParticipantLoader.load(filePath);
+			} catch (ParticipantLoadException e) {
+				TrialGUI.errorPanel.showError(e.getMessage() + " Participants have not been allocated.");
+			}
 
-            for (Participant participant : participants) {
-                // Register the participant
-                database.addParticipant(database.getTrialDefinition(trialName), participant);
+			for (Participant participant : participants) {
+				// Register the participant
+				database.addParticipant(database.getTrialDefinition(trialName), participant);
 
-                // Allocate them
-                try {
-                    Strategy.allocate(notifier.getCurrentTrialName(), participant.getId(), database);
-                } catch (AllocationException e) {
-                    TrialGUI.errorPanel.showError(e.getMessage());
-                    return;
-                }
-            }
+				// Allocate them
+				try {
+					Strategy.allocate(notifier.getCurrentTrialName(), participant.getId(), database);
+				} catch (AllocationException e) {
+					TrialGUI.errorPanel.showError(e.getMessage());
+					return;
+				}
+			}
 
-            notifier.distributeEvent();
-        }
-    }
+			notifier.distributeEvent();
+		}
+	}
 
 }

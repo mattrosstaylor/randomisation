@@ -11,11 +11,11 @@ package uk.ac.soton.ecs.lifeguide.randomisation.exception;
  * @since 1.7
  */
 public class PersistenceException extends Exception {
-    public PersistenceException(String message) {
-        super(message);
-    }
+	public PersistenceException(String message) {
+		super(message);
+	}
 
-    public PersistenceException(String message, Exception e) {
-        super(message, e);
-    }
+	public PersistenceException(String message, Exception e) {
+		super(message, e);
+	}
 }

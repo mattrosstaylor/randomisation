@@ -11,11 +11,11 @@ package uk.ac.soton.ecs.lifeguide.randomisation.exception;
  * @since 1.7
  */
 public class BadCommandException extends Exception {
-    public BadCommandException(String message) {
-        super(message);
-    }
+	public BadCommandException(String message) {
+		super(message);
+	}
 
-    public BadCommandException(String message, Exception e) {
-        super(message, e);
-    }
+	public BadCommandException(String message, Exception e) {
+		super(message, e);
+	}
 }

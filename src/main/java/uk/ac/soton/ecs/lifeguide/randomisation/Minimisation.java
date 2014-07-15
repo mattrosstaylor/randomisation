@@ -175,9 +175,9 @@ public class Minimisation extends Strategy {
 
 	private String getStratStatString(String strata,Treatment treatment, Attribute attr,Float index) {
 		String ret_str =strata+treatment.getName()+attr.getAttributeName();
-		    if(index != null) {
-		      ret_str+=attr.getGroupIndex(index);
-		    }
+			if(index != null) {
+			  ret_str+=attr.getGroupIndex(index);
+			}
 		return ret_str;
 	}
 
@@ -245,7 +245,6 @@ public class Minimisation extends Strategy {
 
 	@Override
 	protected int allocateImplementation(TrialDefinition trialDefinition, Participant participant, DBConnector dbConnector) throws AllocationException {
-
 
 		for(Attribute attr : trialDefinition.getAttributes()) {
 			if(attr.isGroupingFactor()) {

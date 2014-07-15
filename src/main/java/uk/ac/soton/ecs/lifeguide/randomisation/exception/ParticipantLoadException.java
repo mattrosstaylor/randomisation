@@ -12,16 +12,16 @@ package uk.ac.soton.ecs.lifeguide.randomisation.exception;
 
 public class ParticipantLoadException extends Exception {
 
-    private int lineNum;
+	private int lineNum;
 
-    public ParticipantLoadException(String errorMsg, int lineNum) {
-        super(errorMsg);
-        this.lineNum = lineNum;
-    }
+	public ParticipantLoadException(String errorMsg, int lineNum) {
+		super(errorMsg);
+		this.lineNum = lineNum;
+	}
 
-    @Override
-    public String getMessage() {
-        return "[Line " + lineNum + "]: " + super.getMessage();
-    }
+	@Override
+	public String getMessage() {
+		return "[Line " + lineNum + "]: " + super.getMessage();
+	}
 
 }

@@ -10,11 +10,11 @@ package uk.ac.soton.ecs.lifeguide.randomisation.exception;
  * @since 1.7
  */
 public class AllocationException extends Exception {
-    public AllocationException(String message) {
-        super(message);
-    }
+	public AllocationException(String message) {
+		super(message);
+	}
 
-    public AllocationException(String message, Exception e) {
-        super(message, e);
-    }
+	public AllocationException(String message, Exception e) {
+		super(message, e);
+	}
 }
