@@ -60,7 +60,7 @@ public class CommandLineAPI {
 			json.put("status", COMMAND_FAILURE);
 			json.put("command", Arrays.toString(args));
 			json.put("message", e.getClass().getSimpleName() +": " +e.getMessage());
-			json.put("full_stack", s);
+			json.put("stacktrace", s);
 			System.out.println(json.toString());
 		}
 	}

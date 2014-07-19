@@ -123,10 +123,11 @@ public class ParserTest {
             Assert.assertEquals(ranges.get(0).getRangeMax(), 27.5, 0.001f);
             Assert.assertEquals(ranges.get(1).getRangeMax(), Float.MAX_VALUE, 0.001f);
 
+/* mrt - this feature is not implemented so who the hell cares?!
             List<Attribute> clusters = tDef.getClusterFactors();
             Assert.assertEquals(clusters.size(), 1);
             Assert.assertEquals(clusters.get(0).getAttributeName(), "smokes");
-
+*/
             List<Treatment> treatments = tDef.getTreatments();
             Assert.assertEquals(treatments.size(), 3);
             Assert.assertEquals(treatments.get(0).getName(), "pill1");

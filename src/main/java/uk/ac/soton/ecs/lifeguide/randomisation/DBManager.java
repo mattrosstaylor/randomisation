@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.soton.ecs.lifeguide.randomisation.exception.*;
 
 
-public class DBManager {
+public class DBManager implements DBConnector {
 	private static final Logger logger = LoggerFactory.getLogger(DBManager.class);
 
 	private Connection conn = null;
@@ -51,9 +51,6 @@ public class DBManager {
 
 		db_schema.put("RESPONSE",
 				" (id INT AUTO_INCREMENT PRIMARY KEY, value FLOAT NOT NULL, parameter_name VARCHAR(255) NOT NULL, participant_id INT NOT NULL, time_stamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, trial_definition_id INT NOT NULL )");
-
-		/*db_schema.put("STRATEGY",
-				"(name VARCHAR(255) PRIMARY KEY, class_name VARCHAR(255) )"); */
 
 		db_schema.put("PARTICIPANT",
 				" (id INT AUTO_INCREMENT PRIMARY KEY, given_id INT, treatment_id INT )");
@@ -178,6 +175,7 @@ public class DBManager {
 	 * @param trialDefinition The trial definition to be registered.
 	 * @throws PersistenceException
 	 */
+	@Override
 	public void registerTrial(TrialDefinition trialDefinition) throws PersistenceException {
 		try {
 			PreparedStatement trialInsertStmt = conn.prepareStatement("INSERT INTO INTERVENTION(trial_name, strategy, cluster_factors) VALUES(?,?,?)", Statement.RETURN_GENERATED_KEYS);
@@ -295,6 +293,11 @@ public class DBManager {
 			e.printStackTrace(); // mrt - this will probably never happen....
 		}
 		return false;
+	}
+
+	@Override
+	public boolean trialExists(TrialDefinition trialDefinition) {
+		throw new UnsupportedOperationException();
 	}
 
 	/**

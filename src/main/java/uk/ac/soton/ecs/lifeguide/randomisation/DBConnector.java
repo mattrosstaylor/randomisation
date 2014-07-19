@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
 
+import uk.ac.soton.ecs.lifeguide.randomisation.exception.*;
+
 /**
  * An object that provides basic data retrieval and storage capabilities for {@link TrialDefinition}
  * and {@link Strategy}. The interface allows abstraction of the {@link Strategy} interaction with the actual
@@ -25,19 +27,17 @@ public interface DBConnector {
 	 * Attempts to instantiates a connection to the data resource.
 	 * A useful abstraction for remote storage such as data bases or access trough the web.
 	 *
-	 * @return <code>true</code> if the connection is successfully instantiated.
-	 *         <code>false</code> otherwise.
+	 * @throws PersistenceException if there was a problem connecting
 	 */
-	public boolean connect();
+	public void connect() throws PersistenceException;
 
 	/**
 	 * Attempts to close the connection to the data resource.
 	 * Can also be used for releasing any resources required for the connection.
 	 *
-	 * @return <code>true</code> if the connection is successfully closed.
-	 *         <code>false</code> otherwise
+	 * @throws PersistenceException if there was a problem
 	 */
-	public boolean disconnect();
+	public void disconnect() throws PersistenceException;
 
 	/**
 	 * Registers the given trial definition object on the data resource.
@@ -45,12 +45,9 @@ public interface DBConnector {
 	 * {@link #trialExists(TrialDefinition)} returns <code>true</code>.
 	 *
 	 * @param trialDefinition The trial definition to be registered.
-	 * @return <code>true</code> if the provided TrialDefinition is not present and
-	 *         have been successfully registered.
-	 *         <code>false</code> if the provided TrialDefinition is already registered
-	 *         or the process was unsuccessful.
+	 * @throws PersistenceException if the trial cannot be registered
 	 */
-	public boolean registerTrial(TrialDefinition trialDefinition);
+	public void registerTrial(TrialDefinition trialDefinition) throws PersistenceException;
 
 	/**
 	 * @param trialDefinition The object whose existence on the data resource to be checked.
@@ -92,27 +89,6 @@ public interface DBConnector {
 	public boolean update(TrialDefinition trialDefinition, Participant participant, Statistics strategyStatistics, int treatment) throws SQLException;
 
 	/**
-	 * Registers a {@link Strategy} name to a class name on the data resource.
-	 * This allows later to be able to retrieve the exact class given a simple name of the Strategy
-	 * and allow invoking <code>Strategy.allocate()</code>.
-	 * If successful this method should guarantee that
-	 * <code>strategyExists(trialDefinition)</code> returns true.
-	 *
-	 * @param strategy  The strategy "simple" name which is to be registered.
-	 * @param className The strategy full class name to be registered for the given simple name.
-	 * @return <code>true</code> if the {@link StrategyStatistics} is registered successfully.
-	 *         <code>false</code> otherwise
-	 */
-	public boolean registerStrategy(String strategy, String className);
-
-	/**
-	 * @param strategy The strategy "simple" name which is be checked if exists
-	 * @return <code>true</code> if the {@link StrategyStatistics} is already registered
-	 *         <code>false</code> otherwise
-	 */
-	public boolean strategyExists(String strategy);
-
-	/**
 	 * The method is intended for decoupling the DBConnector from the LifeGuideAPI.
 	 *
 	 * @param lifeGuideAPI Exact implementation of the LifeGuideAPI interface.
@@ -135,7 +111,7 @@ public interface DBConnector {
 	 * @throws SQLException           if something on the database side is going wrong.
 	 * @throws ClassNotFoundException if the {@link Strategy} class provided in the {@link TrialDefinition} is not found.
 	 */
-	public TrialDefinition getTrialDefinition(String name) throws SQLException, ClassNotFoundException;
+	public TrialDefinition getTrialDefinition(String name) throws PersistenceException, InvalidTrialException ;
 
 	/**
 	 * Returns an Set<String> object with the names of all the definitions.
