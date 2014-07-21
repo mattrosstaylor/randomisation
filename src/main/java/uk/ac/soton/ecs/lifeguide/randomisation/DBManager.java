@@ -136,6 +136,7 @@ public class DBManager implements DBConnector {
 	/**
 	 * Connects to the database.
 	 */
+	@Override
 	public void connect() throws PersistenceException {
 		try {
 			new Driver(); // mrt - this is maaaaagic and you have to do this in order to register the Driver
@@ -157,6 +158,7 @@ public class DBManager implements DBConnector {
 	 *
 	 * @throws PersistenceException
 	 */
+	@Override
 	public void disconnect() throws PersistenceException {
 		try {
 			if (conn != null) {
@@ -308,6 +310,9 @@ public class DBManager implements DBConnector {
 	 * @param args
 	 * @return number of participants matching
 	 */
+
+	// mrt - this is only used in unit testing - fuck you!
+	/*
 	public int getCount(TrialDefinition trialDefinition, Map<String, Integer> args) {
 
 		int count = 0;
@@ -361,7 +366,9 @@ public class DBManager implements DBConnector {
 		}
 		return count;
 	}
+	*/
 
+	
 	/**
 	 * Returns a {@link StrategyStatistics} object that corresponds to this participant's treatment arm in this trial.
 	 *
@@ -399,12 +406,15 @@ public class DBManager implements DBConnector {
 	 * @param treatment          The treatment allocation arm that the patient have been assigned to.
 	 * @return Returns true if operation was successful.
 	 */
+	@Override
 	public boolean update(TrialDefinition trialDefinition, Participant participant,
 						  Statistics strategyStatistics, int treatment) throws SQLException {
 		try {
-			PreparedStatement updateStmt = conn.prepareStatement("UPDATE STRATEGY_STATISTICS SET value = ? WHERE statistic_name = ? AND trial_definition_id = ? ");
+			
 			PreparedStatement selectStmt = conn.prepareStatement("SELECT id FROM TREATMENT WHERE trial_definition_id = ? AND name = ?");
 			PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO PARTICIPANT(given_id, treatment_id) VALUES(?,?)");
+			PreparedStatement updateStmt = conn.prepareStatement("UPDATE STRATEGY_STATISTICS SET value = ? WHERE statistic_name = ? AND trial_definition_id = ? ");
+
 
 			int trial_definition_id = getTrialDefinitionId(trialDefinition.getTrialName());
 
@@ -417,7 +427,7 @@ public class DBManager implements DBConnector {
 			rs = selectStmt.getResultSet();
 			if (!rs.next()) {
 				return false;
-			}
+			}			
 
 			int treatmentId = rs.getInt("id");
 			insertStmt.setInt(1, participant.getId());
@@ -426,8 +436,8 @@ public class DBManager implements DBConnector {
 
 			for (String s : strategyStatistics.getAllNames()) {
 				updateStmt.clearParameters();
-				updateStmt.setString(2, s);
 				updateStmt.setFloat(1, strategyStatistics.getStatistic(s));
+				updateStmt.setString(2, s);
 				updateStmt.setInt(3, trial_definition_id);
 				updateStmt.executeUpdate();
 			}

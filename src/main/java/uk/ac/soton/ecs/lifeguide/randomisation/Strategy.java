@@ -1,7 +1,6 @@
 package uk.ac.soton.ecs.lifeguide.randomisation;
 
-import uk.ac.soton.ecs.lifeguide.randomisation.exception.AllocationException;
-import uk.ac.soton.ecs.lifeguide.randomisation.exception.InvalidTrialException;
+import uk.ac.soton.ecs.lifeguide.randomisation.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,11 +42,11 @@ public abstract class Strategy {
 	 * @return <code>int</code> representing the allocated arm number, starting from 0 or
 	 *         <code>-1</code> if it was not possible to allocate the patient to any treatment. This is used when all
 	 *         the treatments have reached their limit of participant and the trial should be terminated.
-	 * @throws AllocationException if something goes wrong while allocating. A meaningful message should be returned.
+	 * @throws AllocationException if something goes wrong while allocating. A meaningful message should be returned. // mrt - fuck you
 	 */
 	public static int allocate(String trialName,
 							   int participantId,
-							   DBConnector dbConnector) throws AllocationException {
+							   DBConnector dbConnector) throws AllocationException, PersistenceException, InvalidTrialException {
 		int arm = 0;
 		Participant participant = null;
 		TrialDefinition trialDefinition = null;
@@ -57,12 +56,6 @@ public abstract class Strategy {
 		}
 		catch (IllegalArgumentException e) {
 			throw new AllocationException("A participant with such ID does not exist.");
-		}
-		catch (SQLException e) {
-			throw new AllocationException("SQL Exception: " + e.getMessage());
-		}
-		catch (ClassNotFoundException e) {
-			throw new AllocationException("The strategy class given by the trial definition was not found.", e);
 		}
 
 		lock.lock();

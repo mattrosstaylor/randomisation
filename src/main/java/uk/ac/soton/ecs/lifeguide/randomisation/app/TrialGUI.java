@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
+import uk.ac.soton.ecs.lifeguide.randomisation.exception.*;
 
 
 import org.slf4j.Logger;
@@ -44,7 +45,7 @@ public class TrialGUI {
 	private JPanel mainPanel;
 	private LocalDBConnector database;
 
-	public void init() {
+	public void init() throws PersistenceException {
 
 		database = new LocalDBConnector();
 		database.connect();
@@ -270,8 +271,14 @@ public class TrialGUI {
 				app.getFrame().addWindowListener(new WindowAdapter() {
 					@Override
 					public void windowClosing(WindowEvent windowEvent) {
-						app.getDatabase().disconnect();
-						app.releaseLock(file, raFile, lock);
+						// mrt - what the fucking fuck, you twats
+						try {
+							app.getDatabase().disconnect();
+							app.releaseLock(file, raFile, lock);
+						}
+						catch (Exception fuck_you_guys) {
+							// chomp chomp
+						}
 					}
 				});
 			} else {

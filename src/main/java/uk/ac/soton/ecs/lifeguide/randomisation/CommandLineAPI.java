@@ -96,13 +96,21 @@ public class CommandLineAPI {
 	}
 
 	/* participant functions */
-	public void addParticipant(String trialName, String participantIdentifier, String dataPath) throws PersistenceException, InvalidTrialException {
+	public void addParticipant(String trialName, String participantIdentifier, String dataPath) throws PersistenceException, InvalidTrialException, FileNotFoundException {
 		if (!database.trialExists(trialName)) {
 			throw new PersistenceException("No such trial: "+ trialName);
 		}
 
 		TrialDefinition trial = database.getTrialDefinition(trialName);
 		logger.debug(trial.toString());
+
+		String data = new Scanner(new File(dataPath)).useDelimiter("\\A").next();
+		JSONObject json = new JSONObject(data);
+		
+		// ignore the json data for now - fuck it!
+
+		//database.
+
 	}
 
 	public void removeParticipant(String trialId, String participantId) {

@@ -46,11 +46,6 @@ public class DBManagerTest {
         try {
             dbm = new DBManager("root", "", "randomisation", "127.0.0.1");
             dbm.connect();
-            if (!dbm.checkTablesExist()) {
-                dbm.createTables();
-            } else {
-                logger.debug("Tables match");
-            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import uk.ac.soton.ecs.lifeguide.randomisation.exception.*;
+
 /**
  * A class for simulating a {@link DBConnector} in memory.
  *
@@ -22,37 +24,37 @@ public class MemoryDBConnector implements DBConnector {
 	private LifeGuideAPI lifeGuideAPI;
 
 	@Override
-	public boolean connect() {
+	public void connect() throws PersistenceException {
 		trialsTable = new HashMap<String, TrialDefinition>();
 		strategyTable = new HashMap<String, Class<? extends Strategy>>(5);
 		statisticsTable = new HashMap<String, Statistics>();
 		patientsTable = new HashMap<Integer, Integer>();
-		return true;
 	}
 
 	@Override
-	public boolean disconnect() {
+	public void disconnect() throws PersistenceException {
 		trialsTable.clear();
 		strategyTable.clear();
 		statisticsTable.clear();
 		patientsTable.clear();
-		return true;
 	}
 
 	@Override
-	public boolean registerTrial(TrialDefinition trialDefinition) {
-		if (trialExists(trialDefinition))
-			return false;
+	public void registerTrial(TrialDefinition trialDefinition) throws PersistenceException {
+		if (trialExists(trialDefinition)) {
+			throw new PersistenceException("could you BE any more lame");
+		}
 		trialsTable.put(trialDefinition.getTrialName(), trialDefinition);
 
 		Map<String, Float> params = Strategy.getStoredParameters(trialDefinition.getStrategy(), trialDefinition);
 		Map<String, Float> trialParams = trialDefinition.getStrategyParams();
-		for (String param : trialParams.keySet())
-			if (params.containsKey(param))
+		for (String param : trialParams.keySet()) {
+			if (params.containsKey(param)) {
 				params.put(param, trialParams.get(param));
+			}
+		}
 		Statistics statistics = new StrategyStatistics(params);
 		statisticsTable.put(trialDefinition.getTrialName(), statistics);
-		return true;
 	}
 
 	@Override
@@ -63,10 +65,10 @@ public class MemoryDBConnector implements DBConnector {
 			return false;
 	}
 
-	@Override
+	/*@Override
 	public int getCount(TrialDefinition trialDefinition, Map<String, Integer> args) {
 		return 0;
-	}
+	}*/ // mrt - fuck you
 
 	@Override
 	public Statistics getStrategyStatistics(TrialDefinition trialDefinition) {
@@ -78,26 +80,6 @@ public class MemoryDBConnector implements DBConnector {
 		patientsTable.put(participant.getId(), treatment);
 		statisticsTable.put(trialDefinition.getTrialName(), strategyStatistics);
 		return true;
-	}
-
-	@Override
-	public boolean registerStrategy(String strategy, String className) {
-		if (strategyExists(strategy))
-			return false;
-		try {
-			strategyTable.put(strategy, Class.forName(className).asSubclass(Strategy.class));
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-		}
-		return true;
-	}
-
-	@Override
-	public boolean strategyExists(String strategy) {
-		if (strategyTable.get(strategy) != null)
-			return true;
-		else
-			return false;
 	}
 
 	@Override

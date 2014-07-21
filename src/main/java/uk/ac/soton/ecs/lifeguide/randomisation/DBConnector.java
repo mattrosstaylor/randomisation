@@ -64,7 +64,8 @@ public interface DBConnector {
 	 * @param args
 	 * @return number of participants matching
 	 */
-	public int getCount(TrialDefinition trialDefinition, Map<String, Integer> args);
+	// mrt - this is only used in unit testing
+//	public int getCount(TrialDefinition trialDefinition, Map<String, Integer> args);
 
 	/**
 	 * Retrieves the {@link StrategyStatistics} object for a given {@link TrialDefinition} and the number of

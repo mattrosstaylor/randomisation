@@ -12,6 +12,7 @@ import uk.ac.soton.ecs.lifeguide.randomisation.Strategy;
 import uk.ac.soton.ecs.lifeguide.randomisation.StrategyStatistics;
 import uk.ac.soton.ecs.lifeguide.randomisation.TrialDefinition;
 import uk.ac.soton.ecs.lifeguide.randomisation.app.LocalDBLoader.ParticipantData;
+import uk.ac.soton.ecs.lifeguide.randomisation.exception.*;
 
 
 public class LocalDBConnector implements DBConnector{
@@ -30,7 +31,7 @@ public class LocalDBConnector implements DBConnector{
 	private Map<Integer, Participant> participants;				// Participant ID -> participant
 	
 	@Override
-	public boolean connect(){
+	public void connect() throws PersistenceException {
 		trialPaths = LocalDBLoader.loadTrialPaths(TRIAL_PATH_FILE);
 		trials = LocalDBLoader.loadTrials(trialPaths);
 		statistics = LocalDBLoader.loadStatistics(STATISTICS_FILE);
@@ -39,12 +40,10 @@ public class LocalDBConnector implements DBConnector{
 		ParticipantData participantData = LocalDBLoader.loadParticipants(ALLOCATION_FILE);
 		allocations = participantData.allocations;
 		stratGroups = participantData.stratGroups;
-		
-		return true;
 	}
 
 	@Override
-	public boolean disconnect(){
+	public void disconnect() throws PersistenceException{
 		LocalDBWriter.writeLocalDB(this, TRIAL_PATH_FILE, ALLOCATION_FILE, STATISTICS_FILE);
 		
 		trials.clear();
@@ -53,37 +52,32 @@ public class LocalDBConnector implements DBConnector{
 		statistics.clear();
 		stratGroups.clear();
 		participants.clear();
-		
-		return true;
+	
 	}
 
 	@Override
-	public boolean registerTrial(TrialDefinition trialDefinition){
-		if(trialExists(trialDefinition))
-			return false;
+	public void registerTrial(TrialDefinition trialDefinition) throws PersistenceException {
+		if(trialExists(trialDefinition)) {
+			throw new PersistenceException("whatever");
+		}
 		
 		// Get the default parameter values.
 		Map<String, Float> defaultParams = Strategy.getStoredParameters(trialDefinition.getStrategy(), trialDefinition);
 		
 		// If these parameter values have been overridden, update them.
 		Map<String, Float> trialParams = trialDefinition.getStrategyParams();
-		for(String trialParam: trialParams.keySet())
-			if(defaultParams.containsKey(trialParam))
+		for(String trialParam: trialParams.keySet()) {
+			if(defaultParams.containsKey(trialParam)) {
 				defaultParams.put(trialParam, trialParams.get(trialParam));
-		
+			}
+		}
 		trials.put(trialDefinition.getTrialName(), trialDefinition);
 		statistics.put(trialDefinition.getTrialName(), new StrategyStatistics(defaultParams));
-		
-		return true;
 	}
 	
-	public boolean registerTrial(TrialDefinition trialDefinition, String filePath){
-		boolean registered = registerTrial(trialDefinition);
-		
-		if(registered)
-			trialPaths.put(trialDefinition.getTrialName(), filePath);
-		
-		return registered;
+	public void registerTrial(TrialDefinition trialDefinition, String filePath) throws PersistenceException {
+		registerTrial(trialDefinition);
+		trialPaths.put(trialDefinition.getTrialName(), filePath);
 	}
 
 	@Override
@@ -95,10 +89,10 @@ public class LocalDBConnector implements DBConnector{
 		return trials.containsKey(trialName) && trials.get(trialName) != null;
 	}
 
-	@Override
-	public int getCount(TrialDefinition trialDefinition, Map<String, Integer> args){
-		return 0;
-	}
+	// @Override
+	// public int getCount(TrialDefinition trialDefinition, Map<String, Integer> args){
+	// 	return 0;
+	// }
 
 	@Override
 	public Statistics getStrategyStatistics(TrialDefinition trialDefinition){
@@ -132,16 +126,6 @@ public class LocalDBConnector implements DBConnector{
 		}
 		
 		return maxID;
-	}
-
-	@Override
-	public boolean registerStrategy(String strategy, String className){
-		return false;
-	}
-
-	@Override
-	public boolean strategyExists(String strategy){
-		return false;
 	}
 
 	@Override

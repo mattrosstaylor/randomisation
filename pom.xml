@@ -27,6 +27,7 @@
                     <archive>
                         <manifest>
                             <mainClass>uk.ac.soton.ecs.lifeguide.randomisation.CommandLineAPI</mainClass>
+                            <!-- <mainClass>uk.ac.soton.ecs.lifeguide.randomisation.app.TrialGUI</mainClass> -->
                         </manifest>
                     </archive>
                     <descriptorRefs>

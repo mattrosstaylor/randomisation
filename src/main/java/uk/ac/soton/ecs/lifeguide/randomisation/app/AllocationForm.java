@@ -4,7 +4,7 @@ import uk.ac.soton.ecs.lifeguide.randomisation.Attribute;
 import uk.ac.soton.ecs.lifeguide.randomisation.Participant;
 import uk.ac.soton.ecs.lifeguide.randomisation.Strategy;
 import uk.ac.soton.ecs.lifeguide.randomisation.TrialDefinition;
-import uk.ac.soton.ecs.lifeguide.randomisation.exception.AllocationException;
+import uk.ac.soton.ecs.lifeguide.randomisation.exception.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -171,7 +171,16 @@ public class AllocationForm extends JPanel implements TrialObserver {
 		int group = 0;
 		try {
 			group = Strategy.allocate(currentTrial.getTrialName(), participantData.getId(), database);
-		} catch (AllocationException e) {
+		}
+		catch (AllocationException e) {
+			TrialGUI.errorPanel.showError(e.getMessage());
+			return;
+		}
+		catch (InvalidTrialException e) {
+			TrialGUI.errorPanel.showError(e.getMessage());
+			return;
+		}
+		catch (PersistenceException e) {
 			TrialGUI.errorPanel.showError(e.getMessage());
 			return;
 		}

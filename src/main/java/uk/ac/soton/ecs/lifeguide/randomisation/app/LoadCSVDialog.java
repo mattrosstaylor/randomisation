@@ -2,8 +2,7 @@ package uk.ac.soton.ecs.lifeguide.randomisation.app;
 
 import uk.ac.soton.ecs.lifeguide.randomisation.Participant;
 import uk.ac.soton.ecs.lifeguide.randomisation.Strategy;
-import uk.ac.soton.ecs.lifeguide.randomisation.exception.AllocationException;
-import uk.ac.soton.ecs.lifeguide.randomisation.exception.ParticipantLoadException;
+import uk.ac.soton.ecs.lifeguide.randomisation.exception.*;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -58,7 +57,16 @@ public class LoadCSVDialog implements ActionListener {
 				// Allocate them
 				try {
 					Strategy.allocate(notifier.getCurrentTrialName(), participant.getId(), database);
-				} catch (AllocationException e) {
+				}
+				catch (AllocationException e) {
+					TrialGUI.errorPanel.showError(e.getMessage());
+					return;
+				}
+				catch (PersistenceException e) {
+					TrialGUI.errorPanel.showError(e.getMessage());
+					return;
+				}
+				catch (InvalidTrialException e) {
 					TrialGUI.errorPanel.showError(e.getMessage());
 					return;
 				}
