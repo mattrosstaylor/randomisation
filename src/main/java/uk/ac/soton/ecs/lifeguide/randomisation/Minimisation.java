@@ -68,10 +68,10 @@ public class Minimisation extends Strategy {
 		return this.stats;
 	}
 
-	private Statistics getStats(TrialDefinition trialDefinition, DBConnector dbConnector) throws SQLException{
+	private Statistics getStats(TrialDefinition trialDefinition, DBManager database) throws SQLException{
 		Statistics stats1 = null;
-		if (dbConnector != null) {
-			stats1 = dbConnector.getStrategyStatistics(trialDefinition);
+		if (database != null) {
+			stats1 = database.getStrategyStatistics(trialDefinition);
 		} else {
 			stats1 = this.stats;
 //			logger.error("No database connector specified, will throw exception unless this is testing\n");
@@ -181,7 +181,7 @@ public class Minimisation extends Strategy {
 		return ret_str;
 	}
 
-	public int getAllocation(TrialDefinition trialDefinition,Participant participant, DBConnector dbConnector) throws AllocationException  {
+	public int getAllocation(TrialDefinition trialDefinition,Participant participant, DBManager database) throws AllocationException  {
 		List<Treatment> treatments = trialDefinition.getTreatments();
 
 		Map<String,Float> responses = participant.getResponses();
@@ -192,7 +192,7 @@ public class Minimisation extends Strategy {
 		}
 		int index = 0;
 
-		//StrategyStatistics stats = getStats(trialDefinition,participant,dbConnector);
+		//StrategyStatistics stats = getStats(trialDefinition,participant,database);
 
 		for(Treatment treatment: treatments) {
 			score[index] = 0.0f;
@@ -244,7 +244,7 @@ public class Minimisation extends Strategy {
 	}
 
 	@Override
-	protected int allocateImplementation(TrialDefinition trialDefinition, Participant participant, DBConnector dbConnector) throws AllocationException {
+	protected int allocateImplementation(TrialDefinition trialDefinition, Participant participant, DBManager database) throws AllocationException {
 
 		for(Attribute attr : trialDefinition.getAttributes()) {
 			if(attr.isGroupingFactor()) {
@@ -259,12 +259,12 @@ public class Minimisation extends Strategy {
 
 
 		 try {
-			 this.stats = getStats(trialDefinition, dbConnector);
+			 this.stats = getStats(trialDefinition, database);
 			} catch (SQLException e) {
 				throw new AllocationException("SQL Exception when loading statistics: " + e.getMessage());
 			}
 
-		int index = getAllocation(trialDefinition, participant, dbConnector);
+		int index = getAllocation(trialDefinition, participant, database);
 		if (index <= -1) {
 			logger.error("Allocation method returned -1, no intervention chosen for participant " + participant.getId() + " in intervention" + trialDefinition.getTrialName() + "\n");
 
@@ -289,9 +289,9 @@ public class Minimisation extends Strategy {
 			}
 		}
 
-		if (dbConnector != null) {
+		if (database != null) {
 			try {
-				dbConnector.update(trialDefinition, participant, this.stats, index);
+				database.update(trialDefinition, participant, this.stats, index);
 			} catch (SQLException e) {
 				throw new AllocationException("SQL Exception when updating statistics: " + e.getMessage());
 			}

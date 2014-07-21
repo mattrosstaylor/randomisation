@@ -20,7 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Kim Svensson (ks6g10@ecs.soton.ac.uk)
  * @see TrialDefinition
  * @see Participant
- * @see DBConnector
+ * @see DBManager
  * @since 1.7
  */
 public abstract class Strategy {
@@ -38,7 +38,7 @@ public abstract class Strategy {
 	 *
 	 * @param trialName     The simple name of the trial, registered at the data source.
 	 * @param participantId The ID of the participant which is to be allocated.
-	 * @param dbConnector   A reference to an implementation of the {@link DBConnector} interface
+	 * @param database   A reference to an implementation of the {@link DBManager} interface
 	 * @return <code>int</code> representing the allocated arm number, starting from 0 or
 	 *         <code>-1</code> if it was not possible to allocate the patient to any treatment. This is used when all
 	 *         the treatments have reached their limit of participant and the trial should be terminated.
@@ -46,13 +46,13 @@ public abstract class Strategy {
 	 */
 	public static int allocate(String trialName,
 							   int participantId,
-							   DBConnector dbConnector) throws AllocationException, PersistenceException, InvalidTrialException {
+							   DBManager database) throws AllocationException, PersistenceException, InvalidTrialException {
 		int arm = 0;
 		Participant participant = null;
 		TrialDefinition trialDefinition = null;
 		try {
-			participant = dbConnector.getParticipant(participantId);
-			trialDefinition = dbConnector.getTrialDefinition(trialName);
+			participant = database.getParticipant(participantId);
+			trialDefinition = database.getTrialDefinition(trialName);
 		}
 		catch (IllegalArgumentException e) {
 			throw new AllocationException("A participant with such ID does not exist.");
@@ -63,7 +63,7 @@ public abstract class Strategy {
 			if (factory.get(trialDefinition.getStrategy()) == null) {
 				factory.put(trialDefinition.getStrategy(), trialDefinition.getStrategy().newInstance());
 			}
-			arm = factory.get(trialDefinition.getStrategy()).allocateImplementation(trialDefinition, participant, dbConnector);
+			arm = factory.get(trialDefinition.getStrategy()).allocateImplementation(trialDefinition, participant, database);
 		}
 		catch (Exception e) { // mrt - change this to a better exception later
 			logger.error("Exception: ", e.fillInStackTrace());
@@ -111,15 +111,15 @@ public abstract class Strategy {
 
 	/**
 	 * Main method used for allocating a participant to a concrete treatment arm.
-	 * The method is called statically through {@link #allocate(String, int, DBConnector)} and
+	 * The method is called statically through {@link #allocate(String, int, DBManager)} and
 	 * should not be called in any other way.
 	 *
 	 * @param trialDefinition The {@link TrialDefinition} object for which allocation is done.
 	 * @param participant     The concrete {@link Participant} to be allocated.
-	 * @param dbConnector     The {@link DBConnector} that will allow any data access.
+	 * @param database     The {@link DBManager} that will allow any data access.
 	 * @return The treatment arm that the patient is allocated to.
 	 */
-	protected abstract int allocateImplementation(TrialDefinition trialDefinition, Participant participant, DBConnector dbConnector) throws AllocationException;
+	protected abstract int allocateImplementation(TrialDefinition trialDefinition, Participant participant, DBManager database) throws AllocationException;
 
 	/**
 	 * The method is called statically through {@link #getRequiredParameters(Class)}  and

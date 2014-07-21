@@ -1,9 +1,0 @@
-Method: BlockRandomisation
-Grouping: practice waist
-
-Block: 45
-
-Arms: usualcare nurse1 web
-
-Group: waist 2
-Group: practice 30

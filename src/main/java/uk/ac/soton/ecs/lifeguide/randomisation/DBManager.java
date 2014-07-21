@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.soton.ecs.lifeguide.randomisation.exception.*;
 
 
-public class DBManager implements DBConnector {
+public class DBManager {
 	private static final Logger logger = LoggerFactory.getLogger(DBManager.class);
 
 	private Connection conn = null;
@@ -24,8 +24,6 @@ public class DBManager implements DBConnector {
 	private String DB_NAME = "randomisation";
 
 	private static final String STRATEGY_CLASS_PACKAGE = "uk.ac.soton.ecs.lifeguide.randomisation.";
-
-	private LifeGuideAPI lifeGuideAPI;
 
 	/**
 	 * @param uname        Database username
@@ -136,7 +134,6 @@ public class DBManager implements DBConnector {
 	/**
 	 * Connects to the database.
 	 */
-	@Override
 	public void connect() throws PersistenceException {
 		try {
 			new Driver(); // mrt - this is maaaaagic and you have to do this in order to register the Driver
@@ -158,7 +155,6 @@ public class DBManager implements DBConnector {
 	 *
 	 * @throws PersistenceException
 	 */
-	@Override
 	public void disconnect() throws PersistenceException {
 		try {
 			if (conn != null) {
@@ -177,7 +173,6 @@ public class DBManager implements DBConnector {
 	 * @param trialDefinition The trial definition to be registered.
 	 * @throws PersistenceException
 	 */
-	@Override
 	public void registerTrial(TrialDefinition trialDefinition) throws PersistenceException {
 		try {
 			PreparedStatement trialInsertStmt = conn.prepareStatement("INSERT INTO INTERVENTION(trial_name, strategy, cluster_factors) VALUES(?,?,?)", Statement.RETURN_GENERATED_KEYS);
@@ -297,7 +292,6 @@ public class DBManager implements DBConnector {
 		return false;
 	}
 
-	@Override
 	public boolean trialExists(TrialDefinition trialDefinition) {
 		throw new UnsupportedOperationException();
 	}
@@ -379,6 +373,7 @@ public class DBManager implements DBConnector {
 		Statistics strategyStats = new StrategyStatistics();
 
 		try {
+			// mrt - "hey guise - i heard that table joins are teh slowest - we should never use them!"
 			PreparedStatement ps = conn.prepareStatement("SELECT statistic_name,value FROM STRATEGY_STATISTICS WHERE trial_definition_id = ?");
 			ps.setInt(1, getTrialDefinitionId(trialDefinition.getTrialName()));
 			ps.executeQuery();
@@ -406,7 +401,6 @@ public class DBManager implements DBConnector {
 	 * @param treatment          The treatment allocation arm that the patient have been assigned to.
 	 * @return Returns true if operation was successful.
 	 */
-	@Override
 	public boolean update(TrialDefinition trialDefinition, Participant participant,
 						  Statistics strategyStatistics, int treatment) throws SQLException {
 		try {
@@ -415,10 +409,11 @@ public class DBManager implements DBConnector {
 			PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO PARTICIPANT(given_id, treatment_id) VALUES(?,?)");
 			PreparedStatement updateStmt = conn.prepareStatement("UPDATE STRATEGY_STATISTICS SET value = ? WHERE statistic_name = ? AND trial_definition_id = ? ");
 
-
+			// mrt - "select * from all_tables where data="the most inefficient thing imaginable"
 			int trial_definition_id = getTrialDefinitionId(trialDefinition.getTrialName());
 
 			selectStmt.setInt(1, trial_definition_id);
+			// mrt - please just shoot me now - i don't even want to live any more...
 			selectStmt.setString(2, trialDefinition.getTreatments().get(treatment).getName());
 			selectStmt.executeQuery();
 
@@ -446,12 +441,8 @@ public class DBManager implements DBConnector {
 			logger.error(e.getMessage());
 			throw e;
 		}
-
 	}
 
-	public void setLifeGuideAPI(LifeGuideAPI lifeGuideAPI) {
-		this.lifeGuideAPI = lifeGuideAPI;
-	}
 
 	/**
 	 * Return the details of the participant for the trial.
@@ -460,7 +451,7 @@ public class DBManager implements DBConnector {
 	 * @return A participant object
 	 */
 	public Participant getParticipant(int id) {
-		return lifeGuideAPI.getParticipant(id);
+		return null;
 	}
 
 	/**
@@ -648,16 +639,16 @@ public class DBManager implements DBConnector {
 	 * @return Returns the number of rows affected .
 	 * @throws SQLException
 	 */
-	public int registerResponse(float val, int trialId, String paramName, int participantId) throws SQLException {
-		PreparedStatement ps = conn.prepareStatement("INSERT INTO RESPONSE (value, parameter_name, participant_id, trial_definition_id ) VALUES (?,?,?,?)");
-		ps.setFloat(1, val);
-		ps.setString(2, paramName);
-		ps.setInt(3, participantId);
-		ps.setInt(4, trialId);
-		ps.executeUpdate();
+	// public int registerResponse(float val, int trialId, String paramName, int participantId) throws SQLException {
+	// 	PreparedStatement ps = conn.prepareStatement("INSERT INTO RESPONSE (value, parameter_name, participant_id, trial_definition_id ) VALUES (?,?,?,?)");
+	// 	ps.setFloat(1, val);
+	// 	ps.setString(2, paramName);
+	// 	ps.setInt(3, participantId);
+	// 	ps.setInt(4, trialId);
+	// 	ps.executeUpdate();
 
-		return ps.getUpdateCount();
-	}
+	// 	return ps.getUpdateCount();
+	// }
 
 	/**
 	 * Why is this not built in java ? This turns int a = [1,2,3] to String b = "1,2,3";

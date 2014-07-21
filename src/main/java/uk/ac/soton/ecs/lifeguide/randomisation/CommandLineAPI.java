@@ -96,7 +96,7 @@ public class CommandLineAPI {
 	}
 
 	/* participant functions */
-	public void addParticipant(String trialName, String participantIdentifier, String dataPath) throws PersistenceException, InvalidTrialException, FileNotFoundException {
+	public void addParticipant(String trialName, String participantIdentifier, String dataPath) throws AllocationException, PersistenceException, InvalidTrialException, FileNotFoundException {
 		if (!database.trialExists(trialName)) {
 			throw new PersistenceException("No such trial: "+ trialName);
 		}
@@ -109,8 +109,14 @@ public class CommandLineAPI {
 		
 		// ignore the json data for now - fuck it!
 
-		//database.
+		Participant participant = new Participant();
+		participant.setId(666);
+		//database.addParticipant(trial.getTrialName(), participant);
 
+		// mrt - seriously?????
+		int cunt = Strategy.allocate(trial.getTrialName(), participant.getId(), database);
+		String treatment = trial.getTreatmentName(cunt);
+		System.out.println("Allocated to: " +treatment);
 	}
 
 	public void removeParticipant(String trialId, String participantId) {

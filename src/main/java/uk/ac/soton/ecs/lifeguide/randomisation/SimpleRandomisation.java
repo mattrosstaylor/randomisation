@@ -30,18 +30,18 @@ public class SimpleRandomisation extends Strategy {
 	@Override
 	protected int allocateImplementation(TrialDefinition trialDefinition,
 										 Participant participant,
-										 DBConnector dbConnector) throws AllocationException {
+										 DBManager database) throws AllocationException {
 		Statistics strategyStatistics = null;
 		try {
-			strategyStatistics = dbConnector.getStrategyStatistics(trialDefinition);
+			strategyStatistics = database.getStrategyStatistics(trialDefinition);
 		} catch (SQLException e) {
 			throw new AllocationException("SQL Exception for statistics: " + e.getMessage());
 		}
 		int stratifiedEnum = trialDefinition.getStratifiedEnumeration(participant);
 		List<Integer> allocations = new ArrayList<Integer>(trialDefinition.getTreatments().size());
-		for (int i = 0; i < trialDefinition.getTreatmentCount(); i++)
+		for (int i = 0; i < trialDefinition.getTreatmentCount(); i++) {
 			allocations.add(Math.round(strategyStatistics.getStatistic(stratifiedEnum + "_" + i + "_allocation")));
-
+		}
 		int sum = 0;
 		List<Treatment> treatments = trialDefinition.getTreatments();
 		for (Treatment treatment : treatments) {
@@ -59,14 +59,15 @@ public class SimpleRandomisation extends Strategy {
 		roll = new Random().nextInt(sum);
 		arm = 0;
 		while (treatments.get(arm).getWeight() <= roll || allocations.get(arm) >= treatments.get(arm).getParticipantLimit()) {
-			if (treatments.get(arm).getParticipantLimit() > allocations.get(arm))
+			if (treatments.get(arm).getParticipantLimit() > allocations.get(arm)) {
 				roll -= treatments.get(arm).getWeight();
+			}
 			arm++;
 		}
 
 		strategyStatistics.putStatistic(stratifiedEnum + "_" + arm + "_allocation", Float.valueOf(allocations.get(arm) + 1));
 		try {
-			dbConnector.update(trialDefinition, participant, strategyStatistics, arm);
+			database.update(trialDefinition, participant, strategyStatistics, arm);
 		} catch (SQLException e) {
 			throw new AllocationException("SQL exception on updating statistics: " + e.getMessage());
 		}

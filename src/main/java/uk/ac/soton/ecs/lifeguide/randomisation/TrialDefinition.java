@@ -323,4 +323,9 @@ public class TrialDefinition {
 		return stratString;
 	}
 
+	// mrt - have you guys even HEARD of the law of demeter?
+	public String getTreatmentName(int index) {
+		return treatments.get(index).getName();
+	}
+
 }

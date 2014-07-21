@@ -51,10 +51,10 @@ public class BlockedRandomisation extends Strategy {
 	@Override
 	protected int allocateImplementation(TrialDefinition trialDefinition,
 										 Participant participant,
-										 DBConnector dbConnector) throws AllocationException {
+										 DBManager database) throws AllocationException {
 		Statistics strategyStatistics = null;
 		try {
-			strategyStatistics = dbConnector.getStrategyStatistics(trialDefinition);
+			strategyStatistics = database.getStrategyStatistics(trialDefinition);
 		} catch (SQLException e) {
 			throw new AllocationException("SQL Exception for statistics: " + e.getMessage());
 		}
@@ -150,7 +150,7 @@ public class BlockedRandomisation extends Strategy {
 		strategyStatistics.putStatistic(stratifiedEnum + "_counter", Float.valueOf(counter));
 		strategyStatistics.putStatistic(stratifiedEnum + "_" + arm + "_allocation", Float.valueOf(allocations.get(arm) + 1));
 		try {
-			dbConnector.update(trialDefinition, participant, strategyStatistics, arm);
+			database.update(trialDefinition, participant, strategyStatistics, arm);
 		} catch (SQLException e) {
 			throw new AllocationException("SQL Exception when updating statistics: " + e.getMessage());
 		}
