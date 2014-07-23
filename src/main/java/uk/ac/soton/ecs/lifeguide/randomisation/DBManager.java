@@ -47,9 +47,6 @@ public class DBManager {
 		db_schema.put("INTERVENTION",
 				" (id INT AUTO_INCREMENT PRIMARY KEY, trial_name VARCHAR(255) UNIQUE NOT NULL, strategy VARCHAR(255) NOT NULL, cluster_factors VARCHAR(255) NOT NULL)");
 
-		db_schema.put("RESPONSE",
-				" (id INT AUTO_INCREMENT PRIMARY KEY, value FLOAT NOT NULL, parameter_name VARCHAR(255) NOT NULL, participant_id INT NOT NULL, time_stamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, trial_definition_id INT NOT NULL )");
-
 		db_schema.put("PARTICIPANT",
 				" (id INT AUTO_INCREMENT PRIMARY KEY, given_id INT, treatment_id INT )");
 

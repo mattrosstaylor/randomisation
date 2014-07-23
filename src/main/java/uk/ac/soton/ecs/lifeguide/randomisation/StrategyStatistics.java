@@ -13,7 +13,7 @@ import java.util.Set;
  * @since 1.7
  */
 
-public class StrategyStatistics implements Statistics {
+public class StrategyStatistics {
 
 	private Map<String, Float> statistics;
 

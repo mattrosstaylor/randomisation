@@ -93,6 +93,19 @@
             <version>5.1.26</version>
         </dependency>
 
+
+	<!-- Hibernate, son -->
+	<dependency>
+		<groupId>org.hibernate</groupId>
+		<artifactId>hibernate-core</artifactId>
+		<version>3.3.1.GA</version>
+	</dependency>
+	<dependency>
+		<groupId>org.hibernate</groupId>
+		<artifactId>hibernate-annotations</artifactId>
+		<version>3.3.1.GA</version>
+	</dependency>
+
 	<!-- JSON for command line API -->
 	<dependency>
 		<groupId>org.json</groupId>
