@@ -59,7 +59,7 @@ public class Minimisation extends Strategy {
 		for (Treatment treatment : trialDefinition.getTreatments()) {
 			for (Attribute attribute : trialDefinition.getAttributes()) {
 				for (int i = 0; i < attribute.getGroupCount(); i++) {
-					String put_string = new String(treatment.getName() + attribute.getAttributeName() + i);
+					String put_string = new String(treatment.getName() + attribute.getName() + i);
 					stats.putStatistic(put_string, 0.0f);
 				}
 			}
@@ -152,7 +152,7 @@ public class Minimisation extends Strategy {
 		int groups = attribute.getGroupCount();
 		float score = 0;
 		for(int i = 0; i < groups;i++) {
-			 String get_string =  treatment.getName()+attribute.getAttributeName()+i;
+			 String get_string =  treatment.getName()+attribute.getName()+i;
 			if(stats.getStatistic(get_string) != null) {
 				score += stats.getStatistic(get_string);
 			}
@@ -174,7 +174,7 @@ public class Minimisation extends Strategy {
 	}
 
 	private String getStratStatString(String strata,Treatment treatment, Attribute attr,Float index) {
-		String ret_str =strata+treatment.getName()+attr.getAttributeName();
+		String ret_str =strata+treatment.getName()+attr.getName();
 			if(index != null) {
 			  ret_str+=attr.getGroupIndex(index);
 			}
@@ -248,15 +248,12 @@ public class Minimisation extends Strategy {
 
 		for(Attribute attr : trialDefinition.getAttributes()) {
 			if(attr.isGroupingFactor()) {
-				if(participant.getResponses().get(attr.getAttributeName()) == null) {
-					  logger.error(" Participants are missing "+ attr.getAttributeName() +" in their response data ");
-					throw new AllocationException("Participants are missing "+ attr.getAttributeName() +" in their response data ");
+				if(participant.getResponses().get(attr.getName()) == null) {
+					  logger.error(" Participants are missing "+ attr.getName() +" in their response data ");
+					throw new AllocationException("Participants are missing "+ attr.getName() +" in their response data ");
 				}
 			}
 		}
-
-
-
 
 		 try {
 			 this.stats = getStats(trialDefinition, database);
@@ -267,9 +264,7 @@ public class Minimisation extends Strategy {
 		int index = getAllocation(trialDefinition, participant, database);
 		if (index <= -1) {
 			logger.error("Allocation method returned -1, no intervention chosen for participant " + participant.getId() + " in intervention" + trialDefinition.getTrialName() + "\n");
-
 		}
-
 
 		Treatment treatment = trialDefinition.getTreatments().get(index);
 		for (String attrs : participant.getResponses().keySet()) {
@@ -281,7 +276,6 @@ public class Minimisation extends Strategy {
 				attr,
 				participant.getResponses().get(attrs));
 
-			//String put_string = treatment.getName() + attr.getAttributeName() + attr.getGroupIndex(participant.getResponses().get(attrs));
 			if(stats.getStatistic(put_string) != null) {
 				stats.putStatistic(put_string, stats.getStatistic(put_string) + 1.f);
 			} else {

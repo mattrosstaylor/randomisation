@@ -18,7 +18,7 @@ public class CommandLineAPI {
 	public static final String COMMAND_SUCCESS = "success";
 
 	private static final Logger logger = LoggerFactory.getLogger(CommandLineAPI.class);
-	private DBManager database;
+	private DataManager database;
 
 
 	private static String stackTraceToString(Throwable t) {
@@ -34,7 +34,7 @@ public class CommandLineAPI {
 			if (args.length == 0) {
 				throw new BadCommandException("No parameters given.");
 			}
-			api.connectDatabase();
+			api.connect();
 
 			if (args[0].equals(REGISTER_TRIAL)) {
 				if (args.length != 3) {
@@ -49,8 +49,6 @@ public class CommandLineAPI {
 				}
 				api.addParticipant(args[1], args[2], args[3]);
 			}
-
-			api.disconnectDatabase();
 		}
 		catch (Exception e) {
 			String s = stackTraceToString(e);
@@ -63,25 +61,27 @@ public class CommandLineAPI {
 			json.put("stacktrace", s);
 			System.out.println(json.toString());
 		}
+		api.disconnect();
 	}
 
-	public void connectDatabase() throws PersistenceException {
-		
-		database = new DBManager("root", "", "randomisation", "127.0.0.1");
+	// mrt - don't really need an instance of this class......
+	public void connect() throws PersistenceException {
+		database = new DataManager("root", "", "randomisation", "127.0.0.1");
 		database.connect();
 	}
 
-	public void disconnectDatabase() throws PersistenceException {
+	public void disconnect() {
 		database.disconnect();
 	}
 
 	/* study functions */
 	public void registerTrial(String trialName, String definitionPath) throws PersistenceException, InvalidTrialException {
-		
-		TrialDefinition trial = TrialLoader.loadTrial(definitionPath);
-		trial.setTrialName(trialName);
+		//Trial t = TrialLoader.loadTrial(definitionPath);
+		//System.out.println(t);
 
-		if (!database.trialExists(trialName)) {
+		if (database.getTrial(trialName) == null) {
+			Trial trial = TrialLoader.loadTrial(definitionPath);
+			trial.setName(trialName);
 			database.registerTrial(trial);
 			// mrt - do success message
 		}
@@ -97,26 +97,25 @@ public class CommandLineAPI {
 
 	/* participant functions */
 	public void addParticipant(String trialName, String participantIdentifier, String dataPath) throws AllocationException, PersistenceException, InvalidTrialException, FileNotFoundException {
-		if (!database.trialExists(trialName)) {
+		Trial trial = database.getTrial(trialName);
+		if (trial == null) {
 			throw new PersistenceException("No such trial: "+ trialName);
 		}
-
-		TrialDefinition trial = database.getTrialDefinition(trialName);
 		logger.debug(trial.toString());
 
-		String data = new Scanner(new File(dataPath)).useDelimiter("\\A").next();
-		JSONObject json = new JSONObject(data);
+		// String data = new Scanner(new File(dataPath)).useDelimiter("\\A").next();
+		// JSONObject json = new JSONObject(data);
 		
-		// ignore the json data for now - fuck it!
+		// // ignore the json data for now - fuck it!
 
-		Participant participant = new Participant();
-		participant.setId(666);
-		//database.addParticipant(trial.getTrialName(), participant);
+		// Participant participant = new Participant();
+		// participant.setId(666);
+		// //database.addParticipant(trial.getTrialName(), participant);
 
-		// mrt - seriously?????
-		int cunt = Strategy.allocate(trial.getTrialName(), participant.getId(), database);
-		String treatment = trial.getTreatmentName(cunt);
-		System.out.println("Allocated to: " +treatment);
+		// // mrt - seriously?????
+		// int cunt = Strategy.allocate(trial.getName(), participant.getId(), database);
+		// //String treatment = trial.getTreatmentName(cunt);
+		// System.out.println("Allocated to: " +cunt);
 	}
 
 	public void removeParticipant(String trialId, String participantId) {

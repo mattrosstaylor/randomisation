@@ -52,6 +52,8 @@ public class ParserUtils {
 	 * @param fullPath The full path to the file.
 	 * @return The file's name, converted to lower case alphanumeric, without directory path and file extension.
 	 */
+
+	// mrt - fuck this method
 	public static String getAlphanumericFileName(String fullPath) {
 		String baseName = new File(fullPath).getName();
 

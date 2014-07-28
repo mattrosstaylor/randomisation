@@ -18,9 +18,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Dionisio Perez-Mavrogenis (dpm3g10@ecs.soton.ac.uk)
  * @author Liam de Valmency (lpdv1g10@ecs.soton.ac.uk)
  * @author Kim Svensson (ks6g10@ecs.soton.ac.uk)
- * @see TrialDefinition
+ * @see Trial
  * @see Participant
- * @see DBManager
+ * @see DataManager
  * @since 1.7
  */
 public abstract class Strategy {
@@ -38,7 +38,7 @@ public abstract class Strategy {
 	 *
 	 * @param trialName     The simple name of the trial, registered at the data source.
 	 * @param participantId The ID of the participant which is to be allocated.
-	 * @param database   A reference to an implementation of the {@link DBManager} interface
+	 * @param database   A reference to an implementation of the {@link DataManager} interface
 	 * @return <code>int</code> representing the allocated arm number, starting from 0 or
 	 *         <code>-1</code> if it was not possible to allocate the patient to any treatment. This is used when all
 	 *         the treatments have reached their limit of participant and the trial should be terminated.
@@ -46,13 +46,13 @@ public abstract class Strategy {
 	 */
 	public static int allocate(String trialName,
 							   int participantId,
-							   DBManager database) throws AllocationException, PersistenceException, InvalidTrialException {
+							   DataManager database) throws AllocationException, PersistenceException, InvalidTrialException {
 		int arm = 0;
 		Participant participant = null;
-		TrialDefinition trialDefinition = null;
+		Trial trialDefinition = null;
 		try {
 			participant = database.getParticipant(participantId);
-			trialDefinition = database.getTrialDefinition(trialName);
+			trialDefinition = database.getTrial(trialName);
 		}
 		catch (IllegalArgumentException e) {
 			throw new AllocationException("A participant with such ID does not exist.");
@@ -60,10 +60,10 @@ public abstract class Strategy {
 
 		lock.lock();
 		try {
-			if (factory.get(trialDefinition.getStrategy()) == null) {
-				factory.put(trialDefinition.getStrategy(), trialDefinition.getStrategy().newInstance());
+			if (factory.get(trialDefinition.getStrategyClass()) == null) {
+				factory.put(trialDefinition.getStrategyClass(), trialDefinition.getStrategyClass().newInstance());
 			}
-			arm = factory.get(trialDefinition.getStrategy()).allocateImplementation(trialDefinition, participant, database);
+			arm = factory.get(trialDefinition.getStrategyClass()).allocateImplementation(trialDefinition, participant, database);
 		}
 		catch (Exception e) { // mrt - change this to a better exception later
 			logger.error("Exception: ", e.fillInStackTrace());
@@ -79,7 +79,7 @@ public abstract class Strategy {
 
 	/**
 	 * @param cls The concrete class of the strategy implementation querying about.
-	 * @return The names of all the parameters for that class that need to be provided in the {@link TrialDefinition} object.
+	 * @return The names of all the parameters for that class that need to be provided in the {@link Trial} object.
 	 *         If no parameters are to be required should return an empty {@link List}.
 	 */
 	public static List<String> getRequiredParameters(Class<? extends Strategy> cls) {
@@ -98,7 +98,7 @@ public abstract class Strategy {
 	 * @return The names of all the fixed parameters for that class that need to be stored on the data source,
 	 *         mapped to their default values. If no parameters are to be stored should return an empty {@link Map}.
 	 */
-	public static Map<String, Float> getStoredParameters(Class<? extends Strategy> cls, TrialDefinition trialDefinition) {
+	public static Map<String, Float> getStoredParameters(Class<? extends Strategy> cls, Trial trialDefinition) {
 		try {
 			if (factory.get(cls) == null)
 				factory.put(cls, cls.newInstance());
@@ -111,32 +111,32 @@ public abstract class Strategy {
 
 	/**
 	 * Main method used for allocating a participant to a concrete treatment arm.
-	 * The method is called statically through {@link #allocate(String, int, DBManager)} and
+	 * The method is called statically through {@link #allocate(String, int, DataManager)} and
 	 * should not be called in any other way.
 	 *
-	 * @param trialDefinition The {@link TrialDefinition} object for which allocation is done.
+	 * @param trialDefinition The {@link Trial} object for which allocation is done.
 	 * @param participant     The concrete {@link Participant} to be allocated.
-	 * @param database     The {@link DBManager} that will allow any data access.
+	 * @param database     The {@link DataManager} that will allow any data access.
 	 * @return The treatment arm that the patient is allocated to.
 	 */
-	protected abstract int allocateImplementation(TrialDefinition trialDefinition, Participant participant, DBManager database) throws AllocationException;
+	protected abstract int allocateImplementation(Trial trialDefinition, Participant participant, DataManager database) throws AllocationException;
 
 	/**
 	 * The method is called statically through {@link #getRequiredParameters(Class)}  and
 	 * should not be called in any other way.
 	 *
-	 * @return The names of all the parameters for that class that need to be provided in the {@link TrialDefinition} object.
+	 * @return The names of all the parameters for that class that need to be provided in the {@link Trial} object.
 	 */
 	protected abstract List<String> getRequiredParametersImplementation();
 
 	/**
-	 * The method is called statically through {@link #getStoredParameters(Class, TrialDefinition)}  and
+	 * The method is called statically through {@link #getStoredParameters(Class, Trial)}  and
 	 * should not be called in any other way.
 	 *
 	 * @return The names of all the parameters for that class that need to be stored on the data source, mapped to their
 	 *         default values.
 	 */
-	protected abstract Map<String, Float> getStoredParametersImplementation(TrialDefinition trialDefinition);
+	protected abstract Map<String, Float> getStoredParametersImplementation(Trial trialDefinition);
 
 
 	/**
@@ -144,19 +144,19 @@ public abstract class Strategy {
 	 * subclass to implement checks specific to their allocation process. If a check does not pass, this method
 	 * throws an InvalidTrialException with a message describing the problem with the trial's parameters.
 	 *
-	 * @param trialDefinition The {@link TrialDefinition} object which should be validated.
+	 * @param trialDefinition The {@link Trial} object which should be validated.
 	 */
-	protected static void checkValidTrial(TrialDefinition trialDefinition) throws InvalidTrialException {
+	protected static void checkValidTrial(Trial trialDefinition) throws InvalidTrialException {
 		try {
-			if (factory.get(trialDefinition.getStrategy()) == null)
-				factory.put(trialDefinition.getStrategy(), trialDefinition.getStrategy().newInstance());
+			if (factory.get(trialDefinition.getStrategyClass()) == null)
+				factory.put(trialDefinition.getStrategyClass(), trialDefinition.getStrategyClass().newInstance());
 
-			factory.get(trialDefinition.getStrategy()).checkValidTrialImplementation(trialDefinition);
+			factory.get(trialDefinition.getStrategyClass()).checkValidTrialImplementation(trialDefinition);
 		} catch (Exception e) { // mrt - change this to a better exception later
 			logger.error("Exception: ", e.fillInStackTrace());
 		}
 	}
 
-	protected abstract void checkValidTrialImplementation(TrialDefinition trialDefinition) throws InvalidTrialException;
+	protected abstract void checkValidTrialImplementation(Trial trialDefinition) throws InvalidTrialException;
 
 }

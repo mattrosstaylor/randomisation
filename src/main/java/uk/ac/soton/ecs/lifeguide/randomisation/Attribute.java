@@ -1,96 +1,71 @@
 package uk.ac.soton.ecs.lifeguide.randomisation;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.*;
+import javax.persistence.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * An object which acts as a basic data store for the various attribute within a {@link TrialDefinition}.
- *
- * @author Liam de Valmency (lpdv1g10@ecs.soton.ac.uk)
- * @author Aleksandar Botev (ab9g10@ecs.soton.ac.uk)
- * @author Dionisio Perez-Mavrogenis (dpm3g10@ecs.soton.ac.uk)
- * @author Kim Svensson (ks6g10@ecs.soton.ac.uk)
- * @since 1.7
- */
+@Entity
+@Table(name = "attributes")
 public class Attribute {
 
-	private static final Logger logger = LoggerFactory.getLogger(Attribute.class);
+	@Id @GeneratedValue
+	@Column(name="id")
+	private int id;
+
+	@ManyToOne
+	@JoinColumn(name="trial_id")
+	private Trial trial;
+
+	@Column(name="name")
+	private String name;
+
+	@Column(name="weight")
+	private float weight;
+
+	@Column(name="grouping_factor")
+	private boolean groupingFactor;
+
+	@OneToMany(mappedBy="attribute", cascade = {CascadeType.ALL})
+	@OrderBy("groupingOrder")
+	private List<Grouping> groupings = new ArrayList<Grouping>();
+
+	@Column(name="number_of_groups")
+	private int numberOfGroups;
 
 	private static final float INT_FLOAT_TOLERANCE = 0.001f;
 
-	private String attributeName;
-	private int numGroups;
-	private List<Group> ranges;
-	private float weight;
-	private boolean groupingFactor;
+	/* constructors */
 
-	/**
-	 * Constructs an empty Attribute object, with no name, no groups and no weight.
-	 */
 	public Attribute() {
-		ranges = new ArrayList<Group>();
-		this.groupingFactor = false;
+			groupings = new ArrayList<Grouping>();
+			this.groupingFactor = false;
 	}
 
-	/**
-	 * Constructs an Attribute object with the specified name, number of groups, and weight.
-	 *
-	 * @param attributeName    The string ID of the attribute.
-	 * @param numGroups        The number of groups this represents (e.g. the 'smokes' attribute would have 2 groups, 'yes' and 'no').
-	 * @param weight           The weight of this attribute, for use in minimisation to allow the attribute's value to have a greater
-	 *                         influence on the balancing function.
-	 * @param isGroupingFactor Whether this attribute acts as a stratifying factor in randomisation, or a balancing factor in
-	 *                         minimisation·
-	 */
-	public Attribute(String attributeName, int numGroups, float weight, boolean isGroupingFactor) {
-		this.attributeName = attributeName;
-		this.ranges = new ArrayList<Group>();
-		this.numGroups = numGroups;
+	public Attribute(String name, int numberOfGroups, float weight, boolean isGroupingFactor) {
+		this.name = name;
+		this.groupings = new ArrayList<Grouping>();
+		this.numberOfGroups = numberOfGroups;
+		this.weight = weight;
+	}
+
+	public Attribute(String name, List<Grouping> groupings, float weight, boolean isGroupingFactor) {
+		this.name = name;
+		this.groupings = groupings;
+		this.numberOfGroups = groupings.size();
 		this.weight = weight;
 		this.groupingFactor = isGroupingFactor;
 	}
 
+	/* methods */
+
 	/**
-	 * Constructs an Attribute object with the specified name, set of range values, and weight.
+	 * Checks whether the attribute is valid for use in a trial.
 	 *
-	 * @param attributeName    The string ID of the attribute.
-	 * @param ranges           A list of Group objects, each representing a bounded set of values for the attribute responses (e.g.
-	 *                         the 'age' attribute might have ranges <20, 20-50 and >50).
-	 * @param weight           The weight of this attribute, for use in minimisation to allow the attribute's value to have a greater
-	 *                         influence on the balancing function.
-	 * @param isGroupingFactor Whether this attribute acts as a stratifying factor in randomisation, or a balancing factor in
-	 *                         minimisation·
+	 * @return The validity of the attribute within the context of a trial. To be considered valid, the
+	 *         attribute must have a non-empty, non-null name, and at least one group.
 	 */
-	public Attribute(String attributeName, List<Group> ranges, float weight, boolean isGroupingFactor) {
-		this.attributeName = attributeName;
-		this.ranges = ranges;
-		this.numGroups = ranges.size();
-		this.weight = weight;
-		this.groupingFactor = isGroupingFactor;
-	}
-
-	public String getAttributeName() {
-		return attributeName;
-	}
-
-	public int getGroupCount() {
-		return numGroups;
-	}
-
-	public List<Group> getRanges() {
-		return ranges;
-	}
-
-	public float getWeight() {
-		return weight;
-	}
-
-	public boolean isGroupingFactor() {
-		return groupingFactor;
-	}
+	public boolean isValid() {
+		return name != null && !name.equals("") && numberOfGroups > 0;
+	} // mrt - this function probably shouldn't exist
 
 	/**
 	 * Gets the index of the given attribute response, within the list of possible responses for this attribute.
@@ -102,22 +77,21 @@ public class Attribute {
 	 *         an integer and returned.
 	 */
 	public int getGroupIndex(float value) {
-		if (ranges.size() == 0) {
+		if (groupings.size() == 0) {
 			int indexVal = (int) value;
 			if (Math.abs(indexVal - value) > INT_FLOAT_TOLERANCE) {
-				String warnMsg = "Response for " + attributeName + " is " + value + ", but" +
-					"this attribute is grouped.\nValue rounded to group " + indexVal;
-				logger.warn(warnMsg);
+				String warnMsg = "Response for " + name + " is " + value + ", but" + "this attribute is grouped.\nValue rounded to group " + indexVal;
+				//logger.warn(warnMsg);
 			}
 			return (int) value;
 		}
 
 		int index = -1;
-		for (int i = 0; i < ranges.size(); ++i) {
-			Group g = ranges.get(i);
+		for (int i = 0; i < groupings.size(); ++i) {
+			Grouping g = groupings.get(i);
 
 			// Range is: [lower, upper). So equal to lower range is fine, must be less than upper range.
-			if (value >= g.getRangeMin() && value < g.getRangeMax()) {
+			if (value >= g.getMinimum() && value < g.getMaximum()) {
 				index = i;
 				break;
 			}
@@ -125,58 +99,28 @@ public class Attribute {
 		return index;
 	}
 
-	/**
-	 * Checks whether the attribute is valid for use in a trial.
-	 *
-	 * @return The validity of the attribute within the context of a trial. To be considered valid, the
-	 *         attribute must have a non-empty, non-null name, and at least one group.
-	 */
-	public boolean isValid() {
-		return attributeName != null && !attributeName.equals("") && numGroups > 0;
-	}
 
-	/**
-	 * @return Whether or not the attribute represents a raw-value response (e.g. 'age' response would be the
-	 *         number of years, banded into groups), or simply a list of groups (e.g. 'smokes' would have two groups, 'yes'
-	 *         and 'no').
-	 */
-	public boolean isRawValue() {
-		return ranges.size() != 0;
-	}
 
-	public void setAttributeName(String attributeName) {
-		this.attributeName = attributeName;
-	}
+	/* getters and setters */
 
-	public void setRanges(List<Group> ranges) {
-		this.ranges = ranges;
-	}
+	public int getId() { return id;}
+	public void setId(int id) { this.id = id; }
 
-	public void setWeight(float weight) {
-		this.weight = weight;
-	}
+	public Trial getTrial() { return trial; }
+	public void setTrial(Trial trial) { this.trial = trial; }
 
-	public void setGroupingFactor(boolean groupingFactor) {
-		this.groupingFactor = groupingFactor;
-	}
+	public String getName() { return name; }
+	public void setName(String name) { this.name = name; }
 
-	private String readableBoolean(boolean val) {
-		return val ? "yes" : "no";
-	}
+	public float getWeight() { return weight; }
+	public void setWeight(float weight) { this.weight = weight; }
 
-	// For nicer output when printing/debugging.
-	public String toString() {
-		String output = attributeName + ": " + numGroups + " groups";
-		if (ranges.size() > 0) {
-			output += " (";
-			for (int i = 0; i < ranges.size(); ++i) {
-				output += ranges.get(i);
-				if (i != ranges.size() - 1)
-					output += ", ";
-			}
-			output += ")";
-		}
-		output += ", Weight: " + weight + ", Stratification factor?: " + readableBoolean(groupingFactor);
-		return output;
-	}
+	public boolean isGroupingFactor() { return groupingFactor; }
+	public void setGroupingFactor(boolean groupingFactor) { this.groupingFactor = groupingFactor; }
+
+	public List<Grouping> getGroupings() { return groupings; }
+	public void setRanges(List<Grouping> groupings) { this.groupings = groupings; }
+
+	public int getNumberOfGroups() { return numberOfGroups; }
+	public void setNumberOfGroups(int numberOfGroups) { this.numberOfGroups = numberOfGroups; }
 }

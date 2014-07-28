@@ -105,8 +105,19 @@
 		<artifactId>hibernate-annotations</artifactId>
 		<version>3.3.1.GA</version>
 	</dependency>
+	<dependency>
+		<groupId>javassist</groupId>
+		<artifactId>javassist</artifactId>
+		<version>3.12.1.GA</version>
+	</dependency>
+<dependency>
+    <groupId>org.hibernate.javax.persistence</groupId>
+    <artifactId>hibernate-jpa-2.0-api</artifactId>
+    <version>1.0.1.Final</version>
+</dependency>
 
 	<!-- JSON for command line API -->
+
 	<dependency>
 		<groupId>org.json</groupId>
 		<artifactId>json</artifactId>

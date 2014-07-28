@@ -1,3 +1,4 @@
 Method: SimpleRandomisation
 
 Arms: one two three
+Default: one

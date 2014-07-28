@@ -50,11 +50,11 @@ public class TrialLoader{
 	 * @throws InvalidTrialException Contains a message with a human readable description of the problem,
 	 *                               including line number (where possible).
 	 */
-	public static TrialDefinition loadTrial(String filePath) throws InvalidTrialException {
+	public static Trial loadTrial(String filePath) throws InvalidTrialException {
 		String trialName = ParserUtils.getAlphanumericFileName(filePath);
-		String defaultTreatment = null;
+		String defaultArm = null;
 		List<Attribute> attributes = new ArrayList<Attribute>();
-		List<Treatment> treatments = new ArrayList<Treatment>();
+		List<Arm> treatments = new ArrayList<Arm>();
 		List<String> groupingFactors = new ArrayList<String>();
 		List<String> clusterFactors = new ArrayList<String>();
 		HashMap<String, Integer> weights = new HashMap<String, Integer>();
@@ -79,7 +79,7 @@ public class TrialLoader{
 
 			// Valued attributes run across multiple lines. Temp variables for the value's name, and list of range options.
 			String currentName = "";
-			List<Group> ranges = new ArrayList<Group>();
+			List<Grouping> ranges = new ArrayList<Grouping>();
 
 			while ((line = reader.readLine()) != null) {
 				// Read until EOF, track line number, remove whitespace.
@@ -137,7 +137,7 @@ public class TrialLoader{
 					limitStatements.put(line, lineNum);
 				}
 				else if (lineToken.equals(DEFAULT_ARM_TOKEN)) {
-					defaultTreatment = ParserUtils.getTokenAt(line, " ", 1);
+					defaultArm = ParserUtils.getTokenAt(line, " ", 1);
 					defaultArmLineNum = lineNum;
 				}
 				else if (lineToken.equals(ATTRIBUTE_TOKEN)) {
@@ -145,7 +145,7 @@ public class TrialLoader{
 					// If we were tracking a value (i.e. multi-line with answer options), store it now.
 					if (ranges.size() > 0) {
 						attributes.add(new Attribute(currentName, ranges, 1, false));
-						ranges = new ArrayList<Group>();
+						ranges = new ArrayList<Grouping>();
 					}
 
 					List<String> lineTokens = ParserUtils.tokenise(line, " ");
@@ -168,10 +168,10 @@ public class TrialLoader{
 					}
 				}
 				else if (lineToken.equals(ARMS_TOKEN)) {
-					// Tokenise the list of treatment arms, set them up as Treatment objects. Weights assigned later.
+					// Tokenise the list of treatment arms, set them up as Arm objects. Weights assigned later.
 					List<String> treatmentNames = ParserUtils.tokenise(line, " ", 1);
 					for (String name : treatmentNames)
-						treatments.add(new Treatment(ParserUtils.toAlphaNumeric(name), DEFAULT_ARM_WEIGHT));
+						treatments.add(new Arm(ParserUtils.toAlphaNumeric(name), DEFAULT_ARM_WEIGHT));
 				}
 				else if (lineToken.equals(WEIGHT_TOKEN)) {
 					// Store the weight statement and line number for later use.
@@ -209,12 +209,12 @@ public class TrialLoader{
 								// Upper bound, implicitly strict <, not <=.
 								errorMsg = "Range formatting error. Format: <[num]";
 								float limit = Float.parseFloat(ParserUtils.toDecimal(line));
-								ranges.add(new Group(line, -Float.MAX_VALUE, limit));
+								ranges.add(new Grouping(line, -Float.MAX_VALUE, limit));
 							} else if (line.charAt(0) == '>') {
 								// Lower bound, implicitly >=.
 								errorMsg = "Range formatting error. Format: >[num]";
 								float limit = Float.parseFloat(ParserUtils.toDecimal(line));
-								ranges.add(new Group(line, limit, Float.MAX_VALUE));
+								ranges.add(new Grouping(line, limit, Float.MAX_VALUE));
 							} else if (line.contains(" to ")) {
 								// Range
 								errorMsg = "Range formatting error. Format: [num] to [num]";
@@ -224,11 +224,11 @@ public class TrialLoader{
 									errorMsg = "Range error. Ensure: lower bound <= upper bound.";
 									throw new InvalidTrialException(errorMsg, lineNum);
 								}
-								ranges.add(new Group(line, lowerLimit, upperLimit));
+								ranges.add(new Grouping(line, lowerLimit, upperLimit));
 							} else {
 								errorMsg = "Value error. Formats: [num], [num] to [num], <[num], or >[num]";
 								float val = Float.parseFloat(line);
-								ranges.add(new Group(line, val, val));
+								ranges.add(new Grouping(line, val, val));
 							}
 						} catch (NumberFormatException e) {
 							throw new InvalidTrialException(errorMsg, lineNum);
@@ -259,7 +259,7 @@ public class TrialLoader{
 			String tName = ParserUtils.getTokenAt(limitString, " ", 1);
 			boolean found = false;
 			// Find the named treatment.
-			for (Treatment treatment : treatments) {
+			for (Arm treatment : treatments) {
 				if (treatment.getName() != null && treatment.getName().equals(tName)) {
 					try {
 						// Assign the limit to the treatment.
@@ -287,7 +287,7 @@ public class TrialLoader{
 		for (String weightString : weights.keySet()) {
 			String weightName = ParserUtils.getTokenAt(weightString, " ", 1);
 			boolean found = false;
-			for (Treatment treatment : treatments) {
+			for (Arm treatment : treatments) {
 				if (treatment.getName() != null && treatment.getName().equals(weightName)) {
 					try{
 						treatment.setWeight(Integer.parseInt(ParserUtils.getTokenAt(weightString, " ", 2)));
@@ -312,7 +312,7 @@ public class TrialLoader{
 			String attrName = ParserUtils.getTokenAt(weightString, " ", 1);
 			boolean found = false;
 			for (Attribute attribute : attributes) {
-				if (attribute.getAttributeName() != null && attribute.getAttributeName().equals(attrName)) {
+				if (attribute.getName() != null && attribute.getName().equals(attrName)) {
 					try{
 						attribute.setWeight(Float.parseFloat(ParserUtils.getTokenAt(weightString, " ", 2)));
 					} catch(NumberFormatException e){
@@ -336,7 +336,7 @@ public class TrialLoader{
 		for (String groupName : groupingFactors) {
 			boolean found = false;
 			for (Attribute attr : attributes) {
-				if (attr.getAttributeName() != null && attr.getAttributeName().equals(groupName)) {
+				if (attr.getName() != null && attr.getName().equals(groupName)) {
 					attr.setGroupingFactor(true);
 					found = true;
 				}
@@ -355,7 +355,7 @@ public class TrialLoader{
 		for (String clusterName : clusterFactors) {
 			boolean found = false;
 			for (int i = 0; i < attributes.size(); ++i) {
-				if (attributes.get(i).getAttributeName().equals(clusterName)) {
+				if (attributes.get(i).getName().equals(clusterName)) {
 					indexList.add(i);
 					found = true;
 				}
@@ -372,14 +372,14 @@ public class TrialLoader{
 		// ====================================================================================
 		// Set up default treatment arm, throw an error if the specified default arm does not exist.
 		// ====================================================================================
-		if (defaultTreatment != null) {
+		if (defaultArm != null) {
 			boolean defaultFound = false;
-			for (Treatment treatment : treatments) {
-				if (treatment.getName().equals(defaultTreatment))
+			for (Arm treatment : treatments) {
+				if (treatment.getName().equals(defaultArm))
 					defaultFound = true;
 			}
 			if (!defaultFound) {
-				String errMsg = "Default treatment arm '" + defaultTreatment + "' specified, but no such treatment arm exists.";
+				String errMsg = "Default treatment arm '" + defaultArm + "' specified, but no such treatment arm exists.";
 				throw new InvalidTrialException(errMsg, defaultArmLineNum);
 			}
 		}
@@ -409,7 +409,7 @@ public class TrialLoader{
 		if (strategyName == "" || strategyClass == null)
 			throw new InvalidTrialException("No allocation method chosen! Usage is \"Method: [method name]\".", lineNum);
 
-		// Treatment presence.
+		// Arm presence.
 		if (treatments.size() == 0)
 			throw new InvalidTrialException("No trial arms specified! Usage is \"Arms: arm1 arm2 arm3 ...\"", lineNum);
 
@@ -418,13 +418,13 @@ public class TrialLoader{
 		for (Attribute attr : attributes) {
 			if (!attr.isValid())
 				throw new InvalidTrialException("Invalid attribute. Attributes must have a name, and at least one group.", lineNum);
-			if (attrNames.contains(attr.getAttributeName()))
-				throw new InvalidTrialException("Duplicate attribute name: " + attr.getAttributeName(), lineNum);
-			attrNames.add(attr.getAttributeName());
+			if (attrNames.contains(attr.getName()))
+				throw new InvalidTrialException("Duplicate attribute name: " + attr.getName(), lineNum);
+			attrNames.add(attr.getName());
 		}
 
-		TrialDefinition tDef = new TrialDefinition(trialName, strategyClass, strategyName, strategyParams, attributes, treatments, clusterIndices);
-		tDef.setDefaultTreatment(defaultTreatment);
+		Trial tDef = new Trial(trialName, strategyClass, strategyName, strategyParams, attributes, treatments, clusterIndices);
+		tDef.setDefaultArm(defaultArm);
 
 		// Check that the trial complies with any extra checks needed for its choice of allocation strategy.
 		try{
