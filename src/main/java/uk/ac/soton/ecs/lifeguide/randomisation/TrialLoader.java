@@ -102,22 +102,6 @@ public class TrialLoader{
 				// mrt - this used to be a switch statement
 				if (lineToken.equals(STRATEGY_TYPE_TOKEN)) {
 					strategyName = ParserUtils.getTokenAt(line, " ", 1);
-					try {
-						// Attempt to load the named class. Use casting/not-found exceptions to detect failure.
-						String className = STRATEGY_CLASS_PACKAGE + strategyName;
-						strategyClass = Class.forName(className).asSubclass(Strategy.class);
-
-						// Do not allow the Strategy class itself.
-						if (strategyClass.equals(Strategy.class)) {
-							throw new ClassNotFoundException();
-						}
-					}
-					catch (ClassNotFoundException e) {
-						throw new InvalidTrialException("Allocation method not found: " + strategyName + ".", lineNum);
-					}
-					catch (ClassCastException e) {
-						throw new InvalidTrialException("Allocation method not found: " + strategyName + ".", lineNum);
-					}
 				}
 				else if (lineToken.equals(STRATA_TOKEN)) {
 					// Record the grouping factors for later.
@@ -406,12 +390,14 @@ public class TrialLoader{
 		// ====================================================================================
 
 		// Strategy correctness.
-		if (strategyName == "" || strategyClass == null)
+		if (strategyName == "") {
 			throw new InvalidTrialException("No allocation method chosen! Usage is \"Method: [method name]\".", lineNum);
+		}
 
 		// Arm presence.
-		if (treatments.size() == 0)
+		if (treatments.size() == 0) {
 			throw new InvalidTrialException("No trial arms specified! Usage is \"Arms: arm1 arm2 arm3 ...\"", lineNum);
+		}
 
 		// Attributes have no null/empty names, all have at least one group, and there are no duplicate names.
 		List<String> attrNames = new ArrayList<String>();
@@ -423,7 +409,7 @@ public class TrialLoader{
 			attrNames.add(attr.getName());
 		}
 
-		Trial tDef = new Trial(trialName, strategyClass, strategyName, strategyParams, attributes, treatments, clusterIndices);
+		Trial tDef = new Trial(trialName, strategyName, strategyParams, attributes, treatments, clusterIndices);
 		tDef.setDefaultArm(defaultArm);
 
 		// Check that the trial complies with any extra checks needed for its choice of allocation strategy.

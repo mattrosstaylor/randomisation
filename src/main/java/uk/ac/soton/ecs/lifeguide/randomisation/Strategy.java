@@ -27,55 +27,36 @@ public abstract class Strategy {
 
 	private static final Logger logger = LoggerFactory.getLogger(Strategy.class);
 
+	private static final String STRATEGY_CLASS_PACKAGE = "uk.ac.soton.ecs.lifeguide.randomisation.";
+
+	public static Strategy create(String strategyName) throws InvalidTrialException {
+		try {
+			// Attempt to load the named class. Use casting/not-found exceptions to detect failure.
+			String className = STRATEGY_CLASS_PACKAGE + strategyName;
+			Class<? extends Strategy> strategyClass = Class.forName(className).asSubclass(Strategy.class);
+
+			// Do not allow the Strategy class itself.
+			if (strategyClass.equals(Strategy.class)) {
+				throw new ClassNotFoundException();
+			}
+			return strategyClass.newInstance();
+		}
+		catch (ClassNotFoundException e) {
+			throw new InvalidTrialException("Allocation method not found: " + strategyName + ".");
+		}
+		catch (ClassCastException e) {
+			throw new InvalidTrialException("Allocation method not found: " + strategyName + ".");
+		}
+		catch (InstantiationException e) {
+			throw new InvalidTrialException("Allocation method not found: " + strategyName + ".");
+		}
+		catch (IllegalAccessException e) {
+			throw new InvalidTrialException("Allocation method not found: " + strategyName + ".");
+		}
+	}
+
 	private static final ReentrantLock lock = new ReentrantLock(true);
 	private static final Map<Class<? extends Strategy>, Strategy> factory = new HashMap<Class<? extends Strategy>, Strategy>();
-
-	/**
-	 * The method allocates a participant of the trial to a treatment.
-	 * The method is static and synchronous globally through {@link ReentrantLock}.
-	 * This is the only method that should be invoked for allocation regardless
-	 * of the actual implementation class of the strategy algorithm.
-	 *
-	 * @param trialName     The simple name of the trial, registered at the data source.
-	 * @param participantId The ID of the participant which is to be allocated.
-	 * @param database   A reference to an implementation of the {@link DataManager} interface
-	 * @return <code>int</code> representing the allocated arm number, starting from 0 or
-	 *         <code>-1</code> if it was not possible to allocate the patient to any treatment. This is used when all
-	 *         the treatments have reached their limit of participant and the trial should be terminated.
-	 * @throws AllocationException if something goes wrong while allocating. A meaningful message should be returned. // mrt - fuck you
-	 */
-	public static int allocate(String trialName,
-							   int participantId,
-							   DataManager database) throws AllocationException, PersistenceException, InvalidTrialException {
-		int arm = 0;
-		Participant participant = null;
-		Trial trialDefinition = null;
-		try {
-			participant = database.getParticipant(participantId);
-			trialDefinition = database.getTrial(trialName);
-		}
-		catch (IllegalArgumentException e) {
-			throw new AllocationException("A participant with such ID does not exist.");
-		}
-
-		lock.lock();
-		try {
-			if (factory.get(trialDefinition.getStrategyClass()) == null) {
-				factory.put(trialDefinition.getStrategyClass(), trialDefinition.getStrategyClass().newInstance());
-			}
-			arm = factory.get(trialDefinition.getStrategyClass()).allocateImplementation(trialDefinition, participant, database);
-		}
-		catch (Exception e) { // mrt - change this to a better exception later
-			logger.error("Exception: ", e.fillInStackTrace());
-			throw new AllocationException("Something went terribly wrong with usage of reflection methods.");
-		}
-		finally {
-			lock.unlock();
-		}
-		logger.trace("Assigning treatment arm: {}.", arm);
-
-		return arm;
-	}
 
 	/**
 	 * @param cls The concrete class of the strategy implementation querying about.
@@ -98,11 +79,11 @@ public abstract class Strategy {
 	 * @return The names of all the fixed parameters for that class that need to be stored on the data source,
 	 *         mapped to their default values. If no parameters are to be stored should return an empty {@link Map}.
 	 */
-	public static Map<String, Float> getStoredParameters(Class<? extends Strategy> cls, Trial trialDefinition) {
+	public static Map<String, Float> getStoredParameters(Class<? extends Strategy> cls, Trial trial) {
 		try {
 			if (factory.get(cls) == null)
 				factory.put(cls, cls.newInstance());
-			return factory.get(cls).getStoredParametersImplementation(trialDefinition);
+			return factory.get(cls).getStoredParametersImplementation(trial);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
@@ -114,12 +95,12 @@ public abstract class Strategy {
 	 * The method is called statically through {@link #allocate(String, int, DataManager)} and
 	 * should not be called in any other way.
 	 *
-	 * @param trialDefinition The {@link Trial} object for which allocation is done.
+	 * @param trial The {@link Trial} object for which allocation is done.
 	 * @param participant     The concrete {@link Participant} to be allocated.
 	 * @param database     The {@link DataManager} that will allow any data access.
 	 * @return The treatment arm that the patient is allocated to.
 	 */
-	protected abstract int allocateImplementation(Trial trialDefinition, Participant participant, DataManager database) throws AllocationException;
+	protected abstract Arm allocateImplementation(Trial trial, Participant participant, DataManager database) throws AllocationException;
 
 	/**
 	 * The method is called statically through {@link #getRequiredParameters(Class)}  and
@@ -136,7 +117,7 @@ public abstract class Strategy {
 	 * @return The names of all the parameters for that class that need to be stored on the data source, mapped to their
 	 *         default values.
 	 */
-	protected abstract Map<String, Float> getStoredParametersImplementation(Trial trialDefinition);
+	protected abstract Map<String, Float> getStoredParametersImplementation(Trial trial);
 
 
 	/**
@@ -144,19 +125,16 @@ public abstract class Strategy {
 	 * subclass to implement checks specific to their allocation process. If a check does not pass, this method
 	 * throws an InvalidTrialException with a message describing the problem with the trial's parameters.
 	 *
-	 * @param trialDefinition The {@link Trial} object which should be validated.
+	 * @param trial The {@link Trial} object which should be validated.
 	 */
-	protected static void checkValidTrial(Trial trialDefinition) throws InvalidTrialException {
+	protected static void checkValidTrial(Trial trial) throws InvalidTrialException {
 		try {
-			if (factory.get(trialDefinition.getStrategyClass()) == null)
-				factory.put(trialDefinition.getStrategyClass(), trialDefinition.getStrategyClass().newInstance());
-
-			factory.get(trialDefinition.getStrategyClass()).checkValidTrialImplementation(trialDefinition);
+			Strategy.create(trial.getStrategy()).checkValidTrialImplementation(trial);
 		} catch (Exception e) { // mrt - change this to a better exception later
 			logger.error("Exception: ", e.fillInStackTrace());
 		}
 	}
 
-	protected abstract void checkValidTrialImplementation(Trial trialDefinition) throws InvalidTrialException;
+	protected abstract void checkValidTrialImplementation(Trial trial) throws InvalidTrialException;
 
 }

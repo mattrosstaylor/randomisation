@@ -328,12 +328,7 @@ public class Minimisation extends Strategy {
 			for (Attribute attribute : trialDefinition.getAttributes()) {
 				for (int i = 0; i < attribute.getGroupCount(); i++) {
 
-					String put_string = getStratStatString(
-					strata,
-					treatment,
-					attribute,
-					null)
-						+i;
+					String put_string = getStratStatString(strata, treatment, attribute, null) + i;
 					ret_val.put(put_string, 0.0f);
 				}
 			}

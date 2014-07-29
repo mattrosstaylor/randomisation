@@ -26,47 +26,50 @@ public class SimpleRandomisation extends Strategy {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleRandomisation.class);
 
 	@Override
-	protected int allocateImplementation(Trial trialDefinition,
+	protected Arm allocateImplementation(Trial trial,
 										 Participant participant,
 										 DataManager database) throws AllocationException {
 		Map<String, Float> strategyStatistics;
 
-		strategyStatistics = trialDefinition.getStatistics();
-		int stratifiedEnum = trialDefinition.getStratifiedEnumeration(participant);
-		List<Integer> allocations = new ArrayList<Integer>(trialDefinition.getArms().size());
-		for (int i = 0; i < trialDefinition.getArmCount(); i++) {
-			allocations.add(Math.round(strategyStatistics.get(stratifiedEnum + "_" + i + "_allocation")));
+		strategyStatistics = trial.getStatistics();
+		int stratifiedEnum = trial.getStratifiedEnumeration(participant);
+		List<Integer> allocations = new ArrayList<Integer>(trial.getArms().size());
+		for (Arm a : trial.getArms()) {
+			String enumString = stratifiedEnum + "_" + a.getName() + "_allocation";
+			Float strategyStatistic = strategyStatistics.get(enumString);
+			int roundedVal = Math.round(strategyStatistic);
+			allocations.add(roundedVal);
 		}
 		int sum = 0;
-		List<Arm> treatments = trialDefinition.getArms();
-		for (Arm treatment : treatments) {
-			if (treatment.getMaxParticipants() > allocations.get(treatments.indexOf(treatment)))
+		List<Arm> arms = trial.getArms();
+		for (Arm treatment : arms) {
+			if (treatment.getMaxParticipants() > allocations.get(arms.indexOf(treatment)))
 				sum += treatment.getWeight();
 		}
 
 		//Trial full
 		if (sum == 0) {
 			logger.debug("Trial full.");
-			return trialDefinition.getDefaultArmIndex();
+			return trial.getDefaultArm();
 		}
 
 		int roll, arm;
 		roll = new Random().nextInt(sum);
 		arm = 0;
-		while (treatments.get(arm).getWeight() <= roll || allocations.get(arm) >= treatments.get(arm).getMaxParticipants()) {
-			if (treatments.get(arm).getMaxParticipants() > allocations.get(arm)) {
-				roll -= treatments.get(arm).getWeight();
+		while (arms.get(arm).getWeight() <= roll || allocations.get(arm) >= arms.get(arm).getMaxParticipants()) {
+			if (arms.get(arm).getMaxParticipants() > allocations.get(arm)) {
+				roll -= arms.get(arm).getWeight();
 			}
 			arm++;
 		}
 
-		strategyStatistics.put(stratifiedEnum + "_" + arm + "_allocation", Float.valueOf(allocations.get(arm) + 1));
+		strategyStatistics.put(stratifiedEnum + "_" + arms.get(arm).getName() + "_allocation", Float.valueOf(allocations.get(arm) + 1));
 		try {
-			database.update(trialDefinition, participant, strategyStatistics, arm);
+			database.update(trial, participant, arms.get(arm));
 		} catch (PersistenceException e) {
 			throw new AllocationException("SQL exception on updating statistics: " + e.getMessage());
 		}
-		return arm;
+		return arms.get(arm);
 	}
 
 	@Override
@@ -75,11 +78,13 @@ public class SimpleRandomisation extends Strategy {
 	}
 
 	@Override
-	protected Map<String, Float> getStoredParametersImplementation(Trial trialDefinition) {
+	protected Map<String, Float> getStoredParametersImplementation(Trial trial) {
 		Map<String, Float> params = new HashMap<String, Float>();
-		for (int i = 0; i < trialDefinition.getStratifiedCount(); i++)
-			for (int j = 0; j < trialDefinition.getArmCount(); j++)
-				params.put(i + "_" + j + "_allocation", 0f);
+		for (int i = 0; i < trial.getStratifiedCount(); i++) {
+			for (Arm a : trial.getArms()) { // mrt changed from index to your mom
+				params.put(i + "_" + a.getName() + "_allocation", 0f);
+			}
+		}
 		return params;
 	}
 
@@ -89,7 +94,7 @@ public class SimpleRandomisation extends Strategy {
 	}
 
 	@Override
-	protected void checkValidTrialImplementation(Trial trialDefinition) throws InvalidTrialException {
+	protected void checkValidTrialImplementation(Trial trial) throws InvalidTrialException {
 	}
 
 }

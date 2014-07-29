@@ -47,7 +47,8 @@ public class CommandLineAPI {
 				if (args.length != 4) {
 					throw new BadCommandException("Usage: " + ADD_PARTICIPANT +" trial_name user_identifier data_path");
 				}
-				api.addParticipant(args[1], args[2], args[3]);
+				Random r = new Random();
+				api.addParticipant(args[1], args[2]+r.nextInt(), args[3]);
 			}
 		}
 		catch (Exception e) {
@@ -103,19 +104,19 @@ public class CommandLineAPI {
 		}
 		logger.debug(trial.toString());
 
-		// String data = new Scanner(new File(dataPath)).useDelimiter("\\A").next();
+		String data = new Scanner(new File(dataPath)).useDelimiter("\\A").next();
 		// JSONObject json = new JSONObject(data);
 		
 		// // ignore the json data for now - fuck it!
 
-		// Participant participant = new Participant();
-		// participant.setId(666);
-		// //database.addParticipant(trial.getTrialName(), participant);
+		Participant participant = new Participant();
+		participant.setIdentifier(participantIdentifier);
+		participant.setData(data);
 
 		// // mrt - seriously?????
-		// int cunt = Strategy.allocate(trial.getName(), participant.getId(), database);
+		Arm cunt = trial.allocate(participant, database);
 		// //String treatment = trial.getTreatmentName(cunt);
-		// System.out.println("Allocated to: " +cunt);
+		System.out.println("Allocated to: " +cunt);
 	}
 
 	public void removeParticipant(String trialId, String participantId) {

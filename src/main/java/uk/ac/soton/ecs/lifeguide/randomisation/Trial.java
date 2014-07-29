@@ -1,7 +1,7 @@
 package uk.ac.soton.ecs.lifeguide.randomisation;
 
+import uk.ac.soton.ecs.lifeguide.randomisation.exception.*;
 import javax.persistence.*;
-//import org.hibernate.annotations.*;
 import org.hibernate.annotations.CollectionOfElements;
 import org.hibernate.annotations.MapKey;
 
@@ -30,6 +30,9 @@ public class Trial {
 	private List<Arm> arms = new ArrayList<Arm>();
 
 	@OneToMany(mappedBy="trial", cascade = {CascadeType.ALL})
+	private List<Participant> participants = new ArrayList<Participant>();
+
+	@OneToMany(mappedBy="trial", cascade = {CascadeType.ALL})
 	private List<Attribute> attributes = new ArrayList<Attribute>();
 
 	@CollectionOfElements(targetElement=java.lang.Float.class)
@@ -44,19 +47,15 @@ public class Trial {
 	@Column(name="value") 
 	private Map<String, Float> statistics = new HashMap<String, Float>();
 
-	@Transient
-	private Class<? extends Strategy> strategyClass;
-
 	/* constructor */
     
     public Trial() {}
 
-	public Trial(	String name, Class<? extends Strategy> strategyClass, String strategy,                                                                                                                     
+	public Trial(	String name, String strategy,                                                                                                                     
 					Map<String, Float> parameters, List<Attribute> attributes,                                                                                                           
 					List<Arm> arms, int[] clusterFactors) {                                                                                               
 		this.name = name;
 		this.strategy = strategy;
-		this.strategyClass = strategyClass;
 		this.parameters = parameters;
 		
 		for (Attribute a: attributes) {
@@ -76,6 +75,11 @@ public class Trial {
 		arms.add(arm);
 		arm.setArmOrder(arms.indexOf(arm));
 		arm.setTrial(this);
+	}
+
+	public void addParticipant(Participant p) {
+		participants.add(p);
+		p.setTrial(this);
 	}
 
 	public void addAttribute(Attribute attribute) {
@@ -164,6 +168,10 @@ public class Trial {
 		return output;
 	}
 
+	public Arm allocate(Participant participant, DataManager database) throws InvalidTrialException, AllocationException {
+		return Strategy.create(strategy).allocateImplementation(this, participant, database);
+	}
+
 	/* getters and setters */
 
 	public int getId() { return id; }
@@ -174,13 +182,15 @@ public class Trial {
 
 	public String getStrategy() { return strategy; }
 	public void setStrategy(String strategy) { this.strategy = strategy; }
-	public Class<? extends Strategy> getStrategyClass() { return strategyClass; }
 
 	public Arm getDefaultArm() { return defaultArm; }
 	public void setDefaultArm(Arm defaultArm) { this.defaultArm = defaultArm; }
 	
 	public List<Arm> getArms() { return arms; }
 	public void setArms(List<Arm> arms) { this.arms = arms; }
+
+	public List<Participant> getParticipants() { return participants; }
+	public void setParticipants(List<Participant> participants) { this.participants = participants; }
 
 	public List<Attribute> getAttributes() { return attributes; }
 	public void setAttributes(List<Attribute> attributes) { this.attributes = attributes; }

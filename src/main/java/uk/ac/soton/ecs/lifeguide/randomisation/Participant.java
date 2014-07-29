@@ -1,41 +1,49 @@
 package uk.ac.soton.ecs.lifeguide.randomisation;
 
+import javax.persistence.*;
 import java.util.*;
+
+@Entity
+@Table(name="participants", uniqueConstraints=@UniqueConstraint(columnNames={"trial_id", "identifier"}))
 public class Participant {
-private int id = -1;
-        private Map<String, Float> responses;
+	
+	@Id @GeneratedValue
+	@Column(name="id")
+	private int id;
 
+	@ManyToOne
+	@JoinColumn(name="trial_id")
+	private Trial trial;
 
-	/**
-         * @return The participant's ID.
-         */
-        public int getId() {
-                return id;
-        }
+	@Column(name="identifier")
+	private String identifier;
 
-        public void setId(int id) {
-                this.id = id;
-        }
+	@ManyToOne
+	@JoinColumn(name="allocated_arm_id")
+	private Arm allocatedArm;
 
-        /**
-         * @return A map of the participant's responses for a specific trial. The map is indexed
-         *         on attribute names, and stores a float value for the participant's response.
-         */
-        public Map<String, Float> getResponses() {
-                return responses;
-        }
+	@Column
+	private String data;
 
-        public void setResponses(Map<String, Float> responses) {
-                this.responses = responses;
-        }
+	/* crystal methods */
+	public Float getResponse(String fuckYooooooou) {
+		return null;
+	}
 
-        /**
-         * @return The participant's response for a given attribute, removing the need to fetch
-         *         the entire map when getting a single attribute response.
-         */
-        public Float getResponse(String attrName) {
-                return responses.get(attrName);
+	/* getters and setters */
 
-        }
+	public int getId() { return id; }
+	public void setId(int id) { this.id = id; }
 
+	public Trial getTrial() { return trial; }
+	public void setTrial(Trial trial) { this.trial = trial; }
+
+	public String getIdentifier() { return identifier; }
+	public void setIdentifier(String identifier) { this.identifier = identifier; }
+
+	public Arm getAllocatedArm() { return allocatedArm; }
+	public void setAllocatedArm(Arm allocatedArm) { this.allocatedArm = allocatedArm; }
+
+	public String getData() { return data; }
+	public void setData(String data) { this.data = data; }
 }

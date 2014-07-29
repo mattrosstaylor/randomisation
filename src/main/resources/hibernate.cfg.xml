@@ -21,7 +21,7 @@
    <property name="hibernate.connection.password">
    </property>
    <property name="hbm2ddl.auto">
-      validate
+      update
    </property>
 </session-factory>
 </hibernate-configuration>
