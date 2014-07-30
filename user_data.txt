@@ -1,1 +1,1 @@
-{ "height": "short", "weight": "fat as shit" }
+{ "height": "123", "weight": "70.3" }

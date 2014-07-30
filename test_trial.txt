@@ -1,4 +1,20 @@
 Method: SimpleRandomisation
 
-Arms: one two three
-Default: one
+Stratify: height weight
+
+Arms: control one two
+Weight: control 1
+Weight: one 2
+Weight: two 2
+
+Priority: height 1
+Priority: weight 1
+
+Group: height
+<100
+>100
+
+Group: weight
+<50
+50 to 100
+>100

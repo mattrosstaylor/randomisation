@@ -32,10 +32,10 @@ public class SimpleRandomisation extends Strategy {
 		Map<String, Double> strategyStatistics;
 
 		strategyStatistics = trial.getStatistics();
-		int stratifiedEnum = trial.getStratifiedEnumeration(participant);
+		String stratifiedEnum = trial.getStrata(participant);
 		List<Integer> allocations = new ArrayList<Integer>(trial.getArms().size());
 		for (Arm a : trial.getArms()) {
-			String enumString = stratifiedEnum + "_" + a.getName() + "_allocation";
+			String enumString = getAllocationStatisticName(a.getName(), stratifiedEnum);
 			Double strategyStatistic = strategyStatistics.get(enumString);
 			int roundedVal = (int)(Math.round(strategyStatistic));
 			allocations.add(roundedVal);
@@ -63,7 +63,7 @@ public class SimpleRandomisation extends Strategy {
 			arm++;
 		}
 
-		strategyStatistics.put(stratifiedEnum + "_" + arms.get(arm).getName() + "_allocation", Double.valueOf(allocations.get(arm) + 1));
+		strategyStatistics.put(getAllocationStatisticName(arms.get(arm).getName(), stratifiedEnum), Double.valueOf(allocations.get(arm) + 1));
 		try {
 			database.update(trial, participant, arms.get(arm));
 		} catch (PersistenceException e) {
@@ -80,12 +80,16 @@ public class SimpleRandomisation extends Strategy {
 	@Override
 	protected Map<String, Double> getStoredParametersImplementation(Trial trial) {
 		Map<String, Double> params = new HashMap<String, Double>();
-		for (int i = 0; i < trial.getStratifiedCount(); i++) {
+		for (String s : trial.getAllStrata()) {
 			for (Arm a : trial.getArms()) { // mrt changed from index to your mom
-				params.put(i + "_" + a.getName() + "_allocation", 0.0);
+				params.put(getAllocationStatisticName(a.getName(), s), 0.0);
 			}
 		}
 		return params;
+	}
+
+	private String getAllocationStatisticName(String armName, String strataName) {
+		return armName +" allocations (" + strataName +")";
 	}
 
 	//@Override

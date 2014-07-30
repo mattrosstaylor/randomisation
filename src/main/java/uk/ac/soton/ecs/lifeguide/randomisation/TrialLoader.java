@@ -108,8 +108,9 @@ public class TrialLoader{
 					groupingFactors = ParserUtils.tokenise(line, " ", 1);
 					groupingLineNum = lineNum;
 					// Remove additional punctuation (e.g. commas).
-					for(int i = 0; i < groupingFactors.size(); ++i)
+					for(int i = 0; i < groupingFactors.size(); ++i) {
 						groupingFactors.set(i, ParserUtils.toAlphaNumeric(groupingFactors.get(i)));
+					}
 				}
 				else if (lineToken.equals(CLUSTER_TOKEN)) {
 					// Record the cluster factors for later.

@@ -30,10 +30,11 @@ public class Trial {
 	private List<Arm> arms = new ArrayList<Arm>();
 
 	@OneToMany(mappedBy="trial", cascade = {CascadeType.ALL})
-	private List<Participant> participants = new ArrayList<Participant>();
+	@OrderBy("attributeOrder")
+	private List<Attribute> attributes = new ArrayList<Attribute>();
 
 	@OneToMany(mappedBy="trial", cascade = {CascadeType.ALL})
-	private List<Attribute> attributes = new ArrayList<Attribute>();
+	private List<Participant> participants = new ArrayList<Participant>();
 
 	@CollectionOfElements(targetElement=java.lang.Double.class)
 	@JoinTable(name="parameters", joinColumns=@JoinColumn(name="trial_id"))
@@ -77,14 +78,15 @@ public class Trial {
 		arm.setTrial(this);
 	}
 
+	public void addAttribute(Attribute attribute) {
+		attributes.add(attribute);
+		attribute.setAttributeOrder(attributes.indexOf(attribute));
+		attribute.setTrial(this);
+	}
+
 	public void addParticipant(Participant p) {
 		participants.add(p);
 		p.setTrial(this);
-	}
-
-	public void addAttribute(Attribute attribute) {
-		attributes.add(attribute);
-		attribute.setTrial(this);
 	}
 
 	public void setDefaultArm(String name) {
@@ -99,27 +101,55 @@ public class Trial {
 		return arms.size();
 	}
 
-	public int getStratifiedEnumeration(Participant participant) {
-		int result = 0;
-		int stratifiedCount = getStratifiedCount();
+	public String getStrata(Participant participant) {
+		String result = "";
 		
+		boolean notFirst = false;
 		for (Attribute attribute : attributes) {
 			if (attribute.isGroupingFactor() == true) {
-				stratifiedCount /= attribute.getNumberOfGroups();
-				result += attribute.getGroupIndex(participant.getResponse(attribute.getName())) * stratifiedCount;
+				if (notFirst) {
+					result += ", ";
+				}
+				else{
+					notFirst = true;
+				}
+				result += attribute.getName();
+
+				double response = participant.getResponse(attribute.getName());
+
+				result += " "+attribute.getGroupingNameForValue(response);
 			}
 		}
 		return result;
 	}
 
-	public int getStratifiedCount() {
-		int stratifiedCount = 1;
+	public List<String> getAllStrata() {
+		List<String> result = new ArrayList<String>();
+		result.add("");
+
+		boolean notFirst = false;
 		for (Attribute attribute : attributes) {
 			if (attribute.isGroupingFactor() == true) {
-				stratifiedCount *= attribute.getNumberOfGroups();
+				List<String> newResult = new ArrayList<String>();
+
+				for (String strata : result){
+					if (notFirst) {
+						strata += ", ";
+					}
+					else{
+						notFirst = true;
+					}
+					strata += attribute.getName();
+
+					for (String groupingName : attribute.getAllGroupingNames()){
+						newResult.add(strata + " "+groupingName);
+					}
+				}
+
+				result = newResult;
 			}
 		}
-		return stratifiedCount;
+		return result;
 	}
 
 	public String toString() {
@@ -140,13 +170,15 @@ public class Trial {
 				output += "\n" + key + " = " + parameters.get(key);
 			}
 		}
+
+		// mrt - cluster factors are never used
 /*        output += "\n\nClustered?: " + readableBoolean(isClustered());
 		if (isClustered()) {
 			output += "\nCluster factors:";
 			List<Attribute> clusterAttributes = getClusterFactors();
 			for (Attribute attr : clusterAttributes)
 				output += " " + attr.getAttributeName();
-		} */ // mrt - cluster factors are never used
+		} */ 
 		output += "\nAttributes: ";
 		if (attributes.size() == 0) {
 			output +="\nNone";
@@ -184,11 +216,11 @@ public class Trial {
 	public List<Arm> getArms() { return arms; }
 	public void setArms(List<Arm> arms) { this.arms = arms; }
 
-	public List<Participant> getParticipants() { return participants; }
-	public void setParticipants(List<Participant> participants) { this.participants = participants; }
-
 	public List<Attribute> getAttributes() { return attributes; }
 	public void setAttributes(List<Attribute> attributes) { this.attributes = attributes; }
+
+	public List<Participant> getParticipants() { return participants; }
+	public void setParticipants(List<Participant> participants) { this.participants = participants; }
 
 	public Map<String, Double> getParameters() { return parameters; }
 	public void setParameters(Map<String, Double> parameters) { this.parameters = parameters; }

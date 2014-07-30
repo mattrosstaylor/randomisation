@@ -23,10 +23,10 @@ public class Grouping {
 	@Column(name="maximum")
 	private double maximum;
 	
-	@Column(name="grouping_order")
-	int groupingOrder;
-	
 	/* constructors */
+
+	public Grouping() {
+	}
 
 	public Grouping(String name, double minimum, double maximum) {
 		this.name = name;
@@ -50,7 +50,4 @@ public class Grouping {
 
 	public double getMaximum() { return maximum; }
 	public void setMaximum(double maximum) { this.maximum = maximum; }
-
-	public int getGroupingOrder() { return groupingOrder; }
-	public void setGroupingOrder(int groupingOrder) { this.groupingOrder = groupingOrder; }
 }

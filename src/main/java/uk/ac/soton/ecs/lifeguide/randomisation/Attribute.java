@@ -25,11 +25,13 @@ public class Attribute {
 	private boolean groupingFactor;
 
 	@OneToMany(mappedBy="attribute", cascade = {CascadeType.ALL})
-	@OrderBy("groupingOrder")
 	private List<Grouping> groupings = new ArrayList<Grouping>();
 
 	@Column(name="number_of_groups")
 	private int numberOfGroups;
+
+	@Column(name="attribute_order")
+	int attributeOrder;
 
 	private static final double INT_DOUBLE_TOLERANCE = 0.001;
 
@@ -53,6 +55,11 @@ public class Attribute {
 		this.numberOfGroups = groupings.size();
 		this.weight = weight;
 		this.groupingFactor = isGroupingFactor;
+
+		// mrt - add the back references to the attribute from the grouping
+		for (Grouping g: groupings) {
+			g.setAttribute(this);
+		}
 	}
 
 	/* methods */
@@ -76,27 +83,35 @@ public class Attribute {
 	 *         responses are simply indexed from 0 to the number of groups, so the given participant value is converted to
 	 *         an integer and returned.
 	 */
-	public int getGroupIndex(double value) {
+	public String getGroupingNameForValue(double value) {
+		// mrt - this is completely broken
 		if (groupings.size() == 0) {
 			int indexVal = (int) value;
 			if (Math.abs(indexVal - value) > INT_DOUBLE_TOLERANCE) {
 				String warnMsg = "Response for " + name + " is " + value + ", but" + "this attribute is grouped.\nValue rounded to group " + indexVal;
 				//logger.warn(warnMsg);
 			}
-			return (int) value;
+			return Double.toString(value);
 		}
 
-		int index = -1;
-		for (int i = 0; i < groupings.size(); ++i) {
-			Grouping g = groupings.get(i);
-
+		// mrt - this bit is fiiiiiiiiiine
+		for (Grouping g : groupings) {
 			// Range is: [lower, upper). So equal to lower range is fine, must be less than upper range.
 			if (value >= g.getMinimum() && value < g.getMaximum()) {
-				index = i;
-				break;
+				return g.getName();
 			}
 		}
-		return index;
+		return null;
+	}
+
+	public List<String> getAllGroupingNames() {
+		List<String> result = new ArrayList<String>();
+
+		for (Grouping g : groupings) {
+			result.add(g.getName());
+		}
+
+		return result;
 	}
 
 
@@ -123,4 +138,7 @@ public class Attribute {
 
 	public int getNumberOfGroups() { return numberOfGroups; }
 	public void setNumberOfGroups(int numberOfGroups) { this.numberOfGroups = numberOfGroups; }
+
+	public int getAttributeOrder() { return attributeOrder; }
+	public void setAttributeOrder(int attributeOrder) { this.attributeOrder = attributeOrder; }
 }

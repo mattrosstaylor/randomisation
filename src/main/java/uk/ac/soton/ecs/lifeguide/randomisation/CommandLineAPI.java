@@ -47,8 +47,7 @@ public class CommandLineAPI {
 				if (args.length != 4) {
 					throw new BadCommandException("Usage: " + ADD_PARTICIPANT +" trial_name user_identifier data_path");
 				}
-				Random r = new Random();
-				api.addParticipant(args[1], args[2]+r.nextInt(), args[3]);
+				api.addParticipant(args[1], args[2], args[3]);
 			}
 		}
 		catch (Exception e) {
@@ -104,14 +103,23 @@ public class CommandLineAPI {
 		}
 		logger.debug(trial.toString());
 
+		Random r = new Random();
+
 		String data = new Scanner(new File(dataPath)).useDelimiter("\\A").next();
+		for (int i=0;i<3000;i++) {
+			Participant participant = new Participant();
+			participant.setIdentifier(participantIdentifier+i);
+			participant.setData(data);
+		
+			double height = (Math.abs(r.nextInt()) % 100) + 50;
+			double weight = (Math.abs(r.nextInt()) % 150);
 
-		Participant participant = new Participant();
-		participant.setIdentifier(participantIdentifier);
-		participant.setData(data);
+			// mrt - hack das json
+			participant.setData("{ 'height': '" +height +"','weight': '" +weight +"' }");
 
-		Arm allocatedArm = trial.allocate(participant, database);
-		System.out.println("Allocated to: " +allocatedArm);
+			Arm allocatedArm = trial.allocate(participant, database);
+			System.out.println("Allocated to: " +allocatedArm);
+		}
 	}
 
 	public void removeParticipant(String trialId, String participantId) {
