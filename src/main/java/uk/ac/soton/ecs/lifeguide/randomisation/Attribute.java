@@ -19,7 +19,7 @@ public class Attribute {
 	private String name;
 
 	@Column(name="weight")
-	private float weight;
+	private double weight;
 
 	@Column(name="grouping_factor")
 	private boolean groupingFactor;
@@ -31,7 +31,7 @@ public class Attribute {
 	@Column(name="number_of_groups")
 	private int numberOfGroups;
 
-	private static final float INT_FLOAT_TOLERANCE = 0.001f;
+	private static final double INT_DOUBLE_TOLERANCE = 0.001;
 
 	/* constructors */
 
@@ -40,14 +40,14 @@ public class Attribute {
 			this.groupingFactor = false;
 	}
 
-	public Attribute(String name, int numberOfGroups, float weight, boolean isGroupingFactor) {
+	public Attribute(String name, int numberOfGroups, double weight, boolean isGroupingFactor) {
 		this.name = name;
 		this.groupings = new ArrayList<Grouping>();
 		this.numberOfGroups = numberOfGroups;
 		this.weight = weight;
 	}
 
-	public Attribute(String name, List<Grouping> groupings, float weight, boolean isGroupingFactor) {
+	public Attribute(String name, List<Grouping> groupings, double weight, boolean isGroupingFactor) {
 		this.name = name;
 		this.groupings = groupings;
 		this.numberOfGroups = groupings.size();
@@ -76,10 +76,10 @@ public class Attribute {
 	 *         responses are simply indexed from 0 to the number of groups, so the given participant value is converted to
 	 *         an integer and returned.
 	 */
-	public int getGroupIndex(float value) {
+	public int getGroupIndex(double value) {
 		if (groupings.size() == 0) {
 			int indexVal = (int) value;
-			if (Math.abs(indexVal - value) > INT_FLOAT_TOLERANCE) {
+			if (Math.abs(indexVal - value) > INT_DOUBLE_TOLERANCE) {
 				String warnMsg = "Response for " + name + " is " + value + ", but" + "this attribute is grouped.\nValue rounded to group " + indexVal;
 				//logger.warn(warnMsg);
 			}
@@ -112,8 +112,8 @@ public class Attribute {
 	public String getName() { return name; }
 	public void setName(String name) { this.name = name; }
 
-	public float getWeight() { return weight; }
-	public void setWeight(float weight) { this.weight = weight; }
+	public double getWeight() { return weight; }
+	public void setWeight(double weight) { this.weight = weight; }
 
 	public boolean isGroupingFactor() { return groupingFactor; }
 	public void setGroupingFactor(boolean groupingFactor) { this.groupingFactor = groupingFactor; }

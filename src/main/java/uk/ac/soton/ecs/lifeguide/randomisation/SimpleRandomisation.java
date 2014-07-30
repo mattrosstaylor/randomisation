@@ -29,15 +29,15 @@ public class SimpleRandomisation extends Strategy {
 	protected Arm allocateImplementation(Trial trial,
 										 Participant participant,
 										 DataManager database) throws AllocationException {
-		Map<String, Float> strategyStatistics;
+		Map<String, Double> strategyStatistics;
 
 		strategyStatistics = trial.getStatistics();
 		int stratifiedEnum = trial.getStratifiedEnumeration(participant);
 		List<Integer> allocations = new ArrayList<Integer>(trial.getArms().size());
 		for (Arm a : trial.getArms()) {
 			String enumString = stratifiedEnum + "_" + a.getName() + "_allocation";
-			Float strategyStatistic = strategyStatistics.get(enumString);
-			int roundedVal = Math.round(strategyStatistic);
+			Double strategyStatistic = strategyStatistics.get(enumString);
+			int roundedVal = (int)(Math.round(strategyStatistic));
 			allocations.add(roundedVal);
 		}
 		int sum = 0;
@@ -63,7 +63,7 @@ public class SimpleRandomisation extends Strategy {
 			arm++;
 		}
 
-		strategyStatistics.put(stratifiedEnum + "_" + arms.get(arm).getName() + "_allocation", Float.valueOf(allocations.get(arm) + 1));
+		strategyStatistics.put(stratifiedEnum + "_" + arms.get(arm).getName() + "_allocation", Double.valueOf(allocations.get(arm) + 1));
 		try {
 			database.update(trial, participant, arms.get(arm));
 		} catch (PersistenceException e) {
@@ -78,20 +78,20 @@ public class SimpleRandomisation extends Strategy {
 	}
 
 	@Override
-	protected Map<String, Float> getStoredParametersImplementation(Trial trial) {
-		Map<String, Float> params = new HashMap<String, Float>();
+	protected Map<String, Double> getStoredParametersImplementation(Trial trial) {
+		Map<String, Double> params = new HashMap<String, Double>();
 		for (int i = 0; i < trial.getStratifiedCount(); i++) {
 			for (Arm a : trial.getArms()) { // mrt changed from index to your mom
-				params.put(i + "_" + a.getName() + "_allocation", 0f);
+				params.put(i + "_" + a.getName() + "_allocation", 0.0);
 			}
 		}
 		return params;
 	}
 
 	//@Override
-	protected Map<String, Float> getStoredParametersImplementation() {
-		return new HashMap<String, Float>();
-	}
+	// protected Map<String, Double> getStoredParametersImplementation() {
+	// 	return new HashMap<String, Double>();
+	// }
 
 	@Override
 	protected void checkValidTrialImplementation(Trial trial) throws InvalidTrialException {

@@ -29,7 +29,7 @@ import java.util.*;
  * non-optimal remaining groups.</p>
  * <b>Optional parameters:</b>
  * <p>certainty
- * <b>certainty</b> - Floating point value between 0.0 to 1.0, indicating the probability that minimisation
+ * <b>certainty</b> - Doubleing point value between 0.0 to 1.0, indicating the probability that minimisation
  * allocates to the optimal group, * default value is 1.0.
  * </p>
  *
@@ -90,7 +90,7 @@ public class Minimisation extends Strategy {
 		ArrayList<Integer> listOfSameMinValue = new ArrayList<Integer>();  //List that stores the index of those scores which have same value
 		listOfSameMinValue.add(-1); //Add the error return value to the list if there is something wrong happening
 		int ret_index = -1;    //The return index, -1 as default to indicate a fault, even though it will always be changed
-		double min = Float.MAX_VALUE;  //Init min to be the maximum float value
+		double min = Double.MAX_VALUE;  //Init min to be the maximum double value
 		for(int i = 0; i < score.length;i++) {
 			if(score[i] == min) {
 				listOfSameMinValue.add(i);
@@ -118,7 +118,7 @@ public class Minimisation extends Strategy {
 		return ret_val;
 	}
 
-	private int getProbIntervention(int index, double[] score, float prob) {
+	private int getProbIntervention(int index, double[] score, double prob) {
 		int ret_val = index; //The index which have the probability prob to be chosen
 		ArrayList<Integer> list = new ArrayList<Integer>();
 		for(int i = 0; i < score.length;i++) {
@@ -127,7 +127,7 @@ public class Minimisation extends Strategy {
 			}
 		}
 		Random rand = new Random();
-		if(!(prob+1E-9 >1.0) && rand.nextFloat() > prob && haveNonInfinite(score)) {
+		if(!(prob+1E-9 >1.0) && rand.nextDouble() > prob && haveNonInfinite(score)) {
 			do {
 			Collections.shuffle(list,rand);
 			ret_val = list.get(0);
@@ -150,7 +150,7 @@ public class Minimisation extends Strategy {
 		List<Attribute> attributes = trialDefinition.getAttributes();
 		Attribute attribute = attributes.get(0);
 		int groups = attribute.getGroupCount();
-		float score = 0;
+		double score = 0;
 		for(int i = 0; i < groups;i++) {
 			 String get_string =  treatment.getName()+attribute.getName()+i;
 			if(stats.getStatistic(get_string) != null) {
@@ -173,7 +173,7 @@ public class Minimisation extends Strategy {
 		return strata;
 	}
 
-	private String getStratStatString(String strata,Treatment treatment, Attribute attr,Float index) {
+	private String getStratStatString(String strata,Treatment treatment, Attribute attr,Double index) {
 		String ret_str =strata+treatment.getName()+attr.getName();
 			if(index != null) {
 			  ret_str+=attr.getGroupIndex(index);
@@ -184,7 +184,7 @@ public class Minimisation extends Strategy {
 	public int getAllocation(TrialDefinition trialDefinition,Participant participant, DBManager database) throws AllocationException  {
 		List<Treatment> treatments = trialDefinition.getTreatments();
 
-		Map<String,Float> responses = participant.getResponses();
+		Map<String,Double> responses = participant.getResponses();
 
 		double[] score = new double[treatments.size()];
 		if(treatments.size() <= 0) {
@@ -223,7 +223,7 @@ public class Minimisation extends Strategy {
 		} else {
 			logger.debug("Minimisation determined " + treatments.get(index).getName() +" to be the most suitable treatment\n");
 		}
-		Float probabilistic = stats.getStatistic(keywordProbabilistic);
+		Double probabilistic = stats.getStatistic(keywordProbabilistic);
 		if(probabilistic == null) {
 			probabilistic = 1.00000f;
 		}
@@ -317,8 +317,8 @@ public class Minimisation extends Strategy {
 	 *         default values.
 	 */
 	@Override
-	protected Map<String, Float> getStoredParametersImplementation(TrialDefinition trialDefinition) {
-		Map<String, Float> ret_val = new HashMap<String, Float>();
+	protected Map<String, Double> getStoredParametersImplementation(TrialDefinition trialDefinition) {
+		Map<String, Double> ret_val = new HashMap<String, Double>();
 		String strata = "";
 		for(int s = 0; s < trialDefinition.getStratifiedCount(); s++) {
 		if(trialDefinition.getStratifiedCount() > 1) {

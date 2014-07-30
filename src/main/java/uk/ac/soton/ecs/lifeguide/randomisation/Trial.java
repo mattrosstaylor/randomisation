@@ -35,24 +35,24 @@ public class Trial {
 	@OneToMany(mappedBy="trial", cascade = {CascadeType.ALL})
 	private List<Attribute> attributes = new ArrayList<Attribute>();
 
-	@CollectionOfElements(targetElement=java.lang.Float.class)
+	@CollectionOfElements(targetElement=java.lang.Double.class)
 	@JoinTable(name="parameters", joinColumns=@JoinColumn(name="trial_id"))
 	@MapKey(columns=@Column(name="name"))
 	@Column(name="value") 
-	private Map<String, Float> parameters = new HashMap<String, Float>();
+	private Map<String, Double> parameters = new HashMap<String, Double>();
 
-	@CollectionOfElements(targetElement=java.lang.Float.class)
+	@CollectionOfElements(targetElement=java.lang.Double.class)
 	@JoinTable(name="statistics", joinColumns=@JoinColumn(name="trial_id"))
 	@MapKey(columns=@Column(name="name"))
 	@Column(name="value") 
-	private Map<String, Float> statistics = new HashMap<String, Float>();
+	private Map<String, Double> statistics = new HashMap<String, Double>();
 
 	/* constructor */
     
     public Trial() {}
 
 	public Trial(	String name, String strategy,                                                                                                                     
-					Map<String, Float> parameters, List<Attribute> attributes,                                                                                                           
+					Map<String, Double> parameters, List<Attribute> attributes,                                                                                                           
 					List<Arm> arms, int[] clusterFactors) {                                                                                               
 		this.name = name;
 		this.strategy = strategy;
@@ -120,11 +120,6 @@ public class Trial {
 			}
 		}
 		return stratifiedCount;
-	}
-
-	// mrt - fuck this method
-	public int getDefaultArmIndex() {
-		return 0;
 	}
 
 	public String toString() {
@@ -195,9 +190,9 @@ public class Trial {
 	public List<Attribute> getAttributes() { return attributes; }
 	public void setAttributes(List<Attribute> attributes) { this.attributes = attributes; }
 
-	public Map<String, Float> getParameters() { return parameters; }
-	public void setParameters(Map<String, Float> parameters) { this.parameters = parameters; }
+	public Map<String, Double> getParameters() { return parameters; }
+	public void setParameters(Map<String, Double> parameters) { this.parameters = parameters; }
 
-	public Map<String, Float> getStatistics() { return statistics; }
-	public void setStatistics(Map<String, Float> statistics) { this.statistics = statistics; }
+	public Map<String, Double> getStatistics() { return statistics; }
+	public void setStatistics(Map<String, Double> statistics) { this.statistics = statistics; }
 }

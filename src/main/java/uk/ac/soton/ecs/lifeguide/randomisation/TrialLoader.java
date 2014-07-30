@@ -61,7 +61,7 @@ public class TrialLoader{
 		HashMap<String, Integer> attrWeights = new HashMap<String, Integer>();
 		HashMap<String, Integer> limitStatements = new HashMap<String, Integer>();
 
-		HashMap<String, Float> strategyParams = new HashMap<String, Float>();
+		HashMap<String, Double> strategyParams = new HashMap<String, Double>();
 		String strategyName = "";
 		Class<? extends Strategy> strategyClass = null;
 
@@ -179,7 +179,7 @@ public class TrialLoader{
 							throw new InvalidTrialException(errorMsg, lineNum);
 						}
 						try{
-							strategyParams.put(paramName, Float.parseFloat(paramValue));
+							strategyParams.put(paramName, Double.parseDouble(paramValue));
 						} catch(NumberFormatException e){
 							String errorMsg = "Parameters must be in the format [param name]: [param value], where value is a number.";
 							throw new InvalidTrialException(errorMsg, lineNum);
@@ -192,18 +192,18 @@ public class TrialLoader{
 							if (line.charAt(0) == '<') {
 								// Upper bound, implicitly strict <, not <=.
 								errorMsg = "Range formatting error. Format: <[num]";
-								float limit = Float.parseFloat(ParserUtils.toDecimal(line));
-								ranges.add(new Grouping(line, -Float.MAX_VALUE, limit));
+								double limit = Double.parseDouble(ParserUtils.toDecimal(line));
+								ranges.add(new Grouping(line, -Double.MAX_VALUE, limit));
 							} else if (line.charAt(0) == '>') {
 								// Lower bound, implicitly >=.
 								errorMsg = "Range formatting error. Format: >[num]";
-								float limit = Float.parseFloat(ParserUtils.toDecimal(line));
-								ranges.add(new Grouping(line, limit, Float.MAX_VALUE));
+								double limit = Double.parseDouble(ParserUtils.toDecimal(line));
+								ranges.add(new Grouping(line, limit, Double.MAX_VALUE));
 							} else if (line.contains(" to ")) {
 								// Range
 								errorMsg = "Range formatting error. Format: [num] to [num]";
-								float lowerLimit = Float.parseFloat(ParserUtils.getTokenAt(line, " to ", 0));
-								float upperLimit = Float.parseFloat(ParserUtils.getTokenAt(line, " to ", 1));
+								double lowerLimit = Double.parseDouble(ParserUtils.getTokenAt(line, " to ", 0));
+								double upperLimit = Double.parseDouble(ParserUtils.getTokenAt(line, " to ", 1));
 								if (lowerLimit > upperLimit) {
 									errorMsg = "Range error. Ensure: lower bound <= upper bound.";
 									throw new InvalidTrialException(errorMsg, lineNum);
@@ -211,7 +211,7 @@ public class TrialLoader{
 								ranges.add(new Grouping(line, lowerLimit, upperLimit));
 							} else {
 								errorMsg = "Value error. Formats: [num], [num] to [num], <[num], or >[num]";
-								float val = Float.parseFloat(line);
+								double val = Double.parseDouble(line);
 								ranges.add(new Grouping(line, val, val));
 							}
 						} catch (NumberFormatException e) {
@@ -298,7 +298,7 @@ public class TrialLoader{
 			for (Attribute attribute : attributes) {
 				if (attribute.getName() != null && attribute.getName().equals(attrName)) {
 					try{
-						attribute.setWeight(Float.parseFloat(ParserUtils.getTokenAt(weightString, " ", 2)));
+						attribute.setWeight(Double.parseDouble(ParserUtils.getTokenAt(weightString, " ", 2)));
 					} catch(NumberFormatException e){
 						String errorMsg = "Invalid number formatting. Usage is \"Priority: [attribute name] [priority]\"";
 						throw new InvalidTrialException(errorMsg, weights.get(weightString));

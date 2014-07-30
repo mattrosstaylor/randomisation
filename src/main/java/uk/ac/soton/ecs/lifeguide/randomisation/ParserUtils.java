@@ -126,18 +126,18 @@ public class ParserUtils {
 	}
 
 	/**
-	 * Attempts to convert a string to a float, defaulting to a given limit in the event that
-	 * the conversion fails (e.g. if the provided string is not a float string).
+	 * Attempts to convert a string to a double, defaulting to a given limit in the event that
+	 * the conversion fails (e.g. if the provided string is not a double string).
 	 *
-	 * @param str    The string to convert to a float.
+	 * @param str    The string to convert to a double.
 	 * @param limit  The value to use if the conversion fails.
-	 * @param lineNo Used for warning messages if the conversion fails. Optional, see {@link #stringToFloatLimit(String, float)};
+	 * @param lineNo Used for warning messages if the conversion fails. Optional, see {@link #stringToDoubleLimit(String, double)};
 	 * @return The converted string.
 	 */
-	public static float stringToFloatLimit(String str, float limit, int lineNo) {
+	public static double stringToDoubleLimit(String str, double limit, int lineNo) {
 		try {
-			float parsedFloat = Float.parseFloat(str);
-			return parsedFloat;
+			double parsedDouble = Double.parseDouble(str);
+			return parsedDouble;
 		} catch (NumberFormatException e) {
 			if (lineNo >= 0)
 				logger.warn("[Line " + lineNo + "]: Weight incorrectly formatted or missing. Using default value.");
@@ -146,15 +146,15 @@ public class ParserUtils {
 	}
 
 	/**
-	 * Attempts to convert a string to a float, defaulting to a given limit in the event that
-	 * the conversion fails (e.g. if the provided string is not a float string).
+	 * Attempts to convert a string to a double, defaulting to a given limit in the event that
+	 * the conversion fails (e.g. if the provided string is not a double string).
 	 *
-	 * @param str   The string to convert to a float.
+	 * @param str   The string to convert to a double.
 	 * @param limit The value to use if the conversion fails.
 	 * @return The converted string.
 	 */
-	public static float stringToFloatLimit(String str, float limit) {
-		return stringToFloatLimit(str, limit, -1);
+	public static double stringToDoubleLimit(String str, double limit) {
+		return stringToDoubleLimit(str, limit, -1);
 	}
 
 	/**

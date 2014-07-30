@@ -5,8 +5,8 @@ import uk.ac.soton.ecs.lifeguide.randomisation.exception.*;
 import java.io.*;
 import java.sql.*;
 import java.util.*;
-
 import org.json.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,18 +105,13 @@ public class CommandLineAPI {
 		logger.debug(trial.toString());
 
 		String data = new Scanner(new File(dataPath)).useDelimiter("\\A").next();
-		// JSONObject json = new JSONObject(data);
-		
-		// // ignore the json data for now - fuck it!
 
 		Participant participant = new Participant();
 		participant.setIdentifier(participantIdentifier);
 		participant.setData(data);
 
-		// // mrt - seriously?????
-		Arm cunt = trial.allocate(participant, database);
-		// //String treatment = trial.getTreatmentName(cunt);
-		System.out.println("Allocated to: " +cunt);
+		Arm allocatedArm = trial.allocate(participant, database);
+		System.out.println("Allocated to: " +allocatedArm);
 	}
 
 	public void removeParticipant(String trialId, String participantId) {

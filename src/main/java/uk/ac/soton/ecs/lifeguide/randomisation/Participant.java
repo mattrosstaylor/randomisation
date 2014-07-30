@@ -2,6 +2,7 @@ package uk.ac.soton.ecs.lifeguide.randomisation;
 
 import javax.persistence.*;
 import java.util.*;
+import org.json.*;
 
 @Entity
 @Table(name="participants", uniqueConstraints=@UniqueConstraint(columnNames={"trial_id", "identifier"}))
@@ -25,9 +26,15 @@ public class Participant {
 	@Column
 	private String data;
 
+	@Transient
+	private JSONObject json = null;
+
 	/* crystal methods */
-	public Float getResponse(String fuckYooooooou) {
-		return null;
+	public Double getResponse(String key) {
+		if (json == null) {
+			json = new JSONObject(data);
+		}
+		return json.getDouble(key);
 	}
 
 	/* getters and setters */

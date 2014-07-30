@@ -79,7 +79,7 @@ public abstract class Strategy {
 	 * @return The names of all the fixed parameters for that class that need to be stored on the data source,
 	 *         mapped to their default values. If no parameters are to be stored should return an empty {@link Map}.
 	 */
-	public static Map<String, Float> getStoredParameters(Class<? extends Strategy> cls, Trial trial) {
+	public static Map<String, Double> getStoredParameters(Class<? extends Strategy> cls, Trial trial) {
 		try {
 			if (factory.get(cls) == null)
 				factory.put(cls, cls.newInstance());
@@ -117,7 +117,7 @@ public abstract class Strategy {
 	 * @return The names of all the parameters for that class that need to be stored on the data source, mapped to their
 	 *         default values.
 	 */
-	protected abstract Map<String, Float> getStoredParametersImplementation(Trial trial);
+	protected abstract Map<String, Double> getStoredParametersImplementation(Trial trial);
 
 
 	/**

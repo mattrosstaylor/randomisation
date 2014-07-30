@@ -4,7 +4,6 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "groupings")
-@Embeddable
 public class Grouping {
 
 	@Id @GeneratedValue
@@ -19,17 +18,17 @@ public class Grouping {
 	private String name;
 
 	@Column(name="minimum")
-	private float minimum;
+	private double minimum;
 
 	@Column(name="maximum")
-	private float maximum;
+	private double maximum;
 	
 	@Column(name="grouping_order")
 	int groupingOrder;
 	
 	/* constructors */
 
-	public Grouping(String name, float minimum, float maximum) {
+	public Grouping(String name, double minimum, double maximum) {
 		this.name = name;
 		this.minimum = minimum;
 		this.maximum = maximum;
@@ -46,11 +45,11 @@ public class Grouping {
 	public String getName() { return name; }
 	public void setName(String name) { this.name = name; }
 
-	public float getMinimum() { return minimum; }
-	public void setMinimum(float minimum) { this.minimum = minimum; }
+	public double getMinimum() { return minimum; }
+	public void setMinimum(double minimum) { this.minimum = minimum; }
 
-	public float getMaximum() { return maximum; }
-	public void setMaximum(float maximum) { this.maximum = maximum; }
+	public double getMaximum() { return maximum; }
+	public void setMaximum(double maximum) { this.maximum = maximum; }
 
 	public int getGroupingOrder() { return groupingOrder; }
 	public void setGroupingOrder(int groupingOrder) { this.groupingOrder = groupingOrder; }

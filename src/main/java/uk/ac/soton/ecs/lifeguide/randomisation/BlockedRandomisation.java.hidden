@@ -89,11 +89,11 @@ public class BlockedRandomisation extends Strategy {
 		try {
 			blockSize = (int) Math.round(strategyStatistics.getStatistic("blocksize"));
 			delta = (int) Math.round(strategyStatistics.getStatistic("delta"));
-			sum_in = Float.floatToRawIntBits(strategyStatistics.getStatistic("sum"));
+			sum_in = Double.doubleToRawIntBits(strategyStatistics.getStatistic("sum"));
 			blockSize = blockSize / sum_in;
 			delta = delta / sum_in;
 			actualSize = (int) Math.round(strategyStatistics.getStatistic(stratifiedEnum + "_actualsize"));
-			seed = Float.floatToRawIntBits(strategyStatistics.getStatistic(stratifiedEnum + "_seed"));
+			seed = Double.doubleToRawIntBits(strategyStatistics.getStatistic(stratifiedEnum + "_seed"));
 			counter = actualSize == 0 ? -1 : (int) Math.round(strategyStatistics.getStatistic(stratifiedEnum + "_counter"));
 		} catch (Exception e) {
 			throw new AllocationException("Some of the stored parameters for blocked randomisation was not found in the statistics returned by the database.");
@@ -119,8 +119,8 @@ public class BlockedRandomisation extends Strategy {
 				Collections.shuffle(block, new Random(seed));
 				logger.debug("Block shuffle:\n<{}>", block);
 				counter = 0;
-				strategyStatistics.putStatistic(stratifiedEnum + "_actualsize", Float.valueOf(actualSize));
-				strategyStatistics.putStatistic(stratifiedEnum + "_seed", Float.intBitsToFloat(seed));
+				strategyStatistics.putStatistic(stratifiedEnum + "_actualsize", Double.valueOf(actualSize));
+				strategyStatistics.putStatistic(stratifiedEnum + "_seed", Double.intBitsToDouble(seed));
 			} else {
 				block = new ArrayList<Integer>(actualSize);
 				for (int i = 0; i < treatments.size(); i++)
@@ -147,8 +147,8 @@ public class BlockedRandomisation extends Strategy {
 			}
 		}
 
-		strategyStatistics.putStatistic(stratifiedEnum + "_counter", Float.valueOf(counter));
-		strategyStatistics.putStatistic(stratifiedEnum + "_" + arm + "_allocation", Float.valueOf(allocations.get(arm) + 1));
+		strategyStatistics.putStatistic(stratifiedEnum + "_counter", Double.valueOf(counter));
+		strategyStatistics.putStatistic(stratifiedEnum + "_" + arm + "_allocation", Double.valueOf(allocations.get(arm) + 1));
 		try {
 			database.update(trialDefinition, participant, strategyStatistics, arm);
 		} catch (SQLException e) {
@@ -167,15 +167,15 @@ public class BlockedRandomisation extends Strategy {
 	}
 
 	@Override
-	protected Map<String, Float> getStoredParametersImplementation(TrialDefinition trialDefinition) {
+	protected Map<String, Double> getStoredParametersImplementation(TrialDefinition trialDefinition) {
 		int treatments = trialDefinition.getTreatmentCount();
 		int strata = trialDefinition.getStratifiedCount();
-		Map<String, Float> names = new HashMap<String, Float>(2 + (3 + treatments) * strata);
+		Map<String, Double> names = new HashMap<String, Double>(2 + (3 + treatments) * strata);
 		names.put("blocksize", 10f);
 		names.put("delta", 5f);
 		for (int i = 0; i < strata; i++) {
 			names.put(i + "_actualsize", 0f);
-			names.put(i + "_seed", Float.intBitsToFloat(new Random().nextInt()));
+			names.put(i + "_seed", Double.intBitsToDouble(new Random().nextInt()));
 			names.put(i + "_counter", 0f);
 			for (int j = 0; j < treatments; j++)
 				names.put(i + "_" + j + "_allocation", 0f);
@@ -183,7 +183,7 @@ public class BlockedRandomisation extends Strategy {
 		int totalRatio = 0;
 		for (Treatment treatment : trialDefinition.getTreatments())
 			totalRatio += treatment.getWeight();
-		names.put("sum", Float.intBitsToFloat(totalRatio));
+		names.put("sum", Double.intBitsToDouble(totalRatio));
 		return names;
 	}
 
