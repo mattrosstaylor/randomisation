@@ -28,7 +28,7 @@ public class SimpleRandomisation extends Strategy {
 	@Override
 	protected Arm allocateImplementation(Trial trial,
 										 Participant participant,
-										 DataManager database) throws AllocationException {
+										 DataManager database) throws PersistenceException {
 		Map<String, Double> strategyStatistics;
 
 		strategyStatistics = trial.getStatistics();
@@ -43,8 +43,9 @@ public class SimpleRandomisation extends Strategy {
 		int sum = 0;
 		List<Arm> arms = trial.getArms();
 		for (Arm treatment : arms) {
-			if (treatment.getMaxParticipants() > allocations.get(arms.indexOf(treatment)))
+			if (treatment.getMaxParticipants() > allocations.get(arms.indexOf(treatment))) {
 				sum += treatment.getWeight();
+			}
 		}
 
 		//Trial full
@@ -64,11 +65,9 @@ public class SimpleRandomisation extends Strategy {
 		}
 
 		strategyStatistics.put(getAllocationStatisticName(arms.get(arm).getName(), stratifiedEnum), Double.valueOf(allocations.get(arm) + 1));
-		try {
-			database.update(trial, participant, arms.get(arm));
-		} catch (PersistenceException e) {
-			throw new AllocationException("SQL exception on updating statistics: " + e.getMessage());
-		}
+
+		database.update(trial, participant, arms.get(arm));
+
 		return arms.get(arm);
 	}
 
@@ -89,7 +88,12 @@ public class SimpleRandomisation extends Strategy {
 	}
 
 	private String getAllocationStatisticName(String armName, String strataName) {
-		return armName +" allocations (" + strataName +")";
+		String result = armName +" allocations";
+		
+		if (!strataName.equals("")) {
+			result +=" (" +strataName +")";
+		} 
+		return result;
 	}
 
 	//@Override

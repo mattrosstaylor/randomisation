@@ -195,7 +195,7 @@ public class Trial {
 		return output;
 	}
 
-	public Arm allocate(Participant participant, DataManager database) throws InvalidTrialException, AllocationException {
+	public Arm allocate(Participant participant, DataManager database) throws InvalidTrialException, uk.ac.soton.ecs.lifeguide.randomisation.exception.PersistenceException {
 		return Strategy.create(strategy).allocateImplementation(this, participant, database);
 	}
 

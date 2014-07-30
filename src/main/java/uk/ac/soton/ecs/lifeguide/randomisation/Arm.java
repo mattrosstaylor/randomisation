@@ -3,7 +3,7 @@ package uk.ac.soton.ecs.lifeguide.randomisation;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "arms")
+@Table(name = "arms", uniqueConstraints=@UniqueConstraint(columnNames={"trial_id", "name"}))
 public class Arm {
 	@Id @GeneratedValue
 	@Column(name="id")
@@ -13,7 +13,7 @@ public class Arm {
 	@JoinColumn(name="trial_id")
 	private Trial trial;
 
-	@Column(name="name",unique = true)
+	@Column(name="name")
 	private String name;
 
 	@Column(name="weight")
@@ -41,9 +41,13 @@ public class Arm {
 		this.name = name;
 		this.weight = weight;
 		this.maxParticipants = maxParticipants;
-		this.participantLimit = maxParticipants == Integer.MAX_VALUE 
-										? false 
-										: true;
+		if (this.maxParticipants < Integer.MAX_VALUE) {
+			this.participantLimit = true;
+		}
+		else {
+			this.participantLimit = false;
+		}
+		
 	}
 	/* methods */
 

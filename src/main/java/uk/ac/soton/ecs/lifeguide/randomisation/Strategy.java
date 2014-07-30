@@ -100,7 +100,7 @@ public abstract class Strategy {
 	 * @param database     The {@link DataManager} that will allow any data access.
 	 * @return The treatment arm that the patient is allocated to.
 	 */
-	protected abstract Arm allocateImplementation(Trial trial, Participant participant, DataManager database) throws AllocationException;
+	protected abstract Arm allocateImplementation(Trial trial, Participant participant, DataManager database) throws PersistenceException;
 
 	/**
 	 * The method is called statically through {@link #getRequiredParameters(Class)}  and
@@ -119,7 +119,6 @@ public abstract class Strategy {
 	 */
 	protected abstract Map<String, Double> getStoredParametersImplementation(Trial trial);
 
-
 	/**
 	 * This method is called when loading in any trial which wishes to use this strategy. Allows a specific Strategy
 	 * subclass to implement checks specific to their allocation process. If a check does not pass, this method
@@ -130,7 +129,8 @@ public abstract class Strategy {
 	protected static void checkValidTrial(Trial trial) throws InvalidTrialException {
 		try {
 			Strategy.create(trial.getStrategy()).checkValidTrialImplementation(trial);
-		} catch (Exception e) { // mrt - change this to a better exception later
+		} 
+		catch (Exception e) { // mrt - change this to a better exception later
 			logger.error("Exception: ", e.fillInStackTrace());
 		}
 	}

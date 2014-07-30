@@ -1,5 +1,6 @@
 data/
 target/
 main_java_shortcut
+error.log
 .DS_Store
 *.sh

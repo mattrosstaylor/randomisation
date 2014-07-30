@@ -14,6 +14,7 @@ public class CommandLineAPI {
 
 	public static final String REGISTER_TRIAL = "register_trial";
 	public static final String ADD_PARTICIPANT = "add_participant";
+	public static final String GET_ALLOCATION = "get_allocation";
 	public static final String COMMAND_FAILURE = "failure";
 	public static final String COMMAND_SUCCESS = "success";
 
@@ -29,8 +30,13 @@ public class CommandLineAPI {
 	}
 
 	public static void main(String[] args) {
+		JSONObject json = new JSONObject();
+		json.put("command", Arrays.toString(args));
+
 		CommandLineAPI api = new CommandLineAPI();
 		try {
+			String result = null;
+
 			if (args.length == 0) {
 				throw new BadCommandException("No parameters given.");
 			}
@@ -44,24 +50,41 @@ public class CommandLineAPI {
 			}
 
 			if (args[0].equals(ADD_PARTICIPANT)) {
-				if (args.length != 4) {
-					throw new BadCommandException("Usage: " + ADD_PARTICIPANT +" trial_name user_identifier data_path");
+				if (args.length == 3) {
+					result = api.addParticipant(args[1], args[2], null);
+				} 
+				else if (args.length == 4) {
+					result = api.addParticipant(args[1], args[2], args[3]);
 				}
-				api.addParticipant(args[1], args[2], args[3]);
+				else {
+					throw new BadCommandException("Usage: " + ADD_PARTICIPANT +" trial_name participant_identifier [data_path]");
+				}
+				json.put("allocation", result);
+				json.put("message", args[2] +" was allocated to " +result +" in " +args[1]);
 			}
+			if (args[0].equals(GET_ALLOCATION)) {
+				if (args.length != 3) {
+					throw new BadCommandException("Usage: " +GET_ALLOCATION +" trial_name participant_identifier");
+				}
+				else {
+					result = api.getParticipantAllocation(args[1],args[2]);
+					json.put("allocation", result);
+					json.put("message", args[2] +" is allocated to " +result +" in " +args[1]);
+				}
+			}
+
+			json.put("status", COMMAND_SUCCESS);
+
 		}
 		catch (Exception e) {
 			String s = stackTraceToString(e);
 			logger.error(s);
-
-			JSONObject json = new JSONObject();
 			json.put("status", COMMAND_FAILURE);
-			json.put("command", Arrays.toString(args));
 			json.put("message", e.getClass().getSimpleName() +": " +e.getMessage());
 			json.put("stacktrace", s);
-			System.out.println(json.toString());
 		}
 		api.disconnect();
+		System.out.println(json.toString());
 	}
 
 	// mrt - don't really need an instance of this class......
@@ -75,7 +98,7 @@ public class CommandLineAPI {
 	}
 
 	/* study functions */
-	public void registerTrial(String trialName, String definitionPath) throws PersistenceException, InvalidTrialException {
+	public String registerTrial(String trialName, String definitionPath) throws PersistenceException, InvalidTrialException {
 		//Trial t = TrialLoader.loadTrial(definitionPath);
 		//System.out.println(t);
 
@@ -88,45 +111,47 @@ public class CommandLineAPI {
 		else {
 			throw new PersistenceException("Trial with name " +trialName +" already exists.");
 		}
+		return "Registered Trial with name " +trialName;
 	}
 
-	public void deleteTrial(String trialId) {
+	public String deleteTrial(String trialId) {
 		logger.error("Deleting a trial is currently unsupported");
 		// mrt - looks at existing database code and weeps
+		return "...";
 	}
 
 	/* participant functions */
-	public void addParticipant(String trialName, String participantIdentifier, String dataPath) throws AllocationException, PersistenceException, InvalidTrialException, FileNotFoundException {
+	public String addParticipant(String trialName, String participantIdentifier, String dataPath) throws AllocationException, PersistenceException, InvalidTrialException, FileNotFoundException {
 		Trial trial = database.getTrial(trialName);
 		if (trial == null) {
 			throw new PersistenceException("No such trial: "+ trialName);
 		}
-		logger.debug(trial.toString());
 
-		Random r = new Random();
+		String data;
 
-		String data = new Scanner(new File(dataPath)).useDelimiter("\\A").next();
-		for (int i=0;i<3000;i++) {
-			Participant participant = new Participant();
-			participant.setIdentifier(participantIdentifier+i);
-			participant.setData(data);
-		
-			double height = (Math.abs(r.nextInt()) % 100) + 50;
-			double weight = (Math.abs(r.nextInt()) % 150);
-
-			// mrt - hack das json
-			participant.setData("{ 'height': '" +height +"','weight': '" +weight +"' }");
-
-			Arm allocatedArm = trial.allocate(participant, database);
-			System.out.println("Allocated to: " +allocatedArm);
+		if (dataPath != null) {
+			data = new Scanner(new File(dataPath)).useDelimiter("\\A").next();
 		}
+		else {
+			data = null;
+		}
+
+		Participant participant = new Participant();
+		participant.setIdentifier(participantIdentifier);
+		participant.setData(data);
+	
+		Arm allocatedArm = trial.allocate(participant, database);
+
+		return allocatedArm.getName();
 	}
 
-	public void removeParticipant(String trialId, String participantId) {
+	public String removeParticipant(String trialId, String participantId) {
 		logger.error("Removing a participant is currently unsupported.");
+		return "...";
 	}
 
-	public void getParticipantAllocation(String trialId, String participantId) {
-		logger.info("getParticipantAllocation: "+ trialId +" " +participantId);
+	public String getParticipantAllocation(String trialId, String participantId) {
+		Participant p = database.getParticipant(trialId, participantId);
+		return p.getAllocatedArm().getName();
 	}
 }

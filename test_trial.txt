@@ -1,20 +1,23 @@
 Method: SimpleRandomisation
 
-Stratify: height weight
+#Stratify: height weight horseness
 
 Arms: control one two
 Weight: control 1
 Weight: one 2
 Weight: two 2
 
-Priority: height 1
-Priority: weight 1
+#Limit: control 8
 
-Group: height
-<100
->100
+#Group: height
+#<100
+#>100
 
-Group: weight
-<50
-50 to 100
->100
+#Group: weight
+#<50
+#50 to 100
+#>100
+ 
+#Group: horseness
+#<1
+#>1

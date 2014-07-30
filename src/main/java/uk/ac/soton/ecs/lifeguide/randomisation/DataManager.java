@@ -74,9 +74,10 @@ public class DataManager {
 		}
 	}
 
-	public Participant getParticipant(String identifier) {
-		Query q = session.createQuery("from Participant where identifier= :identifier");
+	public Participant getParticipant(String trialName, String identifier) {
+		Query q = session.createQuery("from Participant where identifier= :identifier and trial.name = :trialName");
 		q.setParameter("identifier", identifier);
+		q.setParameter("trialName", trialName);
 		List<Participant> result = q.list();
 		if (result.size() > 0) {
 			return result.get(0);
@@ -100,7 +101,7 @@ public class DataManager {
 		catch (HibernateException e) {
 			session.close();
 			session = DataManager.factory.openSession();
-			throw new PersistenceException("Could not register trial", e);
+			throw new PersistenceException("Could not allocate", e);
 		}
 		return true;
 	}
