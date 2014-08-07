@@ -1,23 +1,23 @@
-## GDP Lifeguide - 2013 University of Southampton
+Standalone Randomisation Module
+===============================
 
-This a self contained module developed for allocating participants in Randomised Control Trials.
+Initialisation:
 
-IMPORTANT: Works with java 7+.
+create user random@localhost identified by 'spork718';
+create database random;
+grant all on randomisation to random;
 
-### Installation
+Usage:
+java -jar randomisation.jar register_trial trial_name trial_definition_path
+java -jar randomisation.jar add_participant trial_name participant_identifier [user_data_path]
+java -jar randomisation.jar get_allocation trial_name participant_identifier
 
-Either use the pre compiled executable gdp-lifeguide.jar directly or download the whole project and build with maven.
 
-### Usage
+Example Definition:
 
-For all the instructions of how to use the module or any examples please refer to the 'wiki' file.
-
-### For developers
-
-The project is open source under the BSD License to University of Southampton.
-The 'documentation' folder you can find the java documentation.
-The 'src' folder contains all the source code and test code.
-The 'res' folder contains any additional resources.
-The project is developed using and Maven and the pom.xml contains all the information you would need in order to build.
-The project report is located in the root folder as gdp_report.pdf.
-
+Method: SimpleRandomisation
+Arms: control one two
+Weight: control 1
+Weight: one 2
+Weight: two 2
+Limit: control 100

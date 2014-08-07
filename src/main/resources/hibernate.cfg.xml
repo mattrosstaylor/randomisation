@@ -16,9 +16,10 @@
       jdbc:mysql://localhost/random
    </property>
    <property name="hibernate.connection.username">
-      root
+      random
    </property>
    <property name="hibernate.connection.password">
+      spork718
    </property>
    <property name="hbm2ddl.auto">
       update

@@ -35,12 +35,13 @@ public class CommandLineAPI {
 
 		CommandLineAPI api = new CommandLineAPI();
 		try {
+			api.connect();
+			
 			String result = null;
 
 			if (args.length == 0) {
 				throw new BadCommandException("No parameters given.");
 			}
-			api.connect();
 
 			if (args[0].equals(REGISTER_TRIAL)) {
 				if (args.length != 3) {
@@ -83,18 +84,23 @@ public class CommandLineAPI {
 			json.put("message", e.getClass().getSimpleName() +": " +e.getMessage());
 			json.put("stacktrace", s);
 		}
-		api.disconnect();
+		finally {
+			api.disconnect();	
+		}
+		
 		System.out.println(json.toString());
 	}
 
 	// mrt - don't really need an instance of this class......
 	public void connect() throws PersistenceException {
-		database = new DataManager("root", "", "randomisation", "127.0.0.1");
+		database = new DataManager();
 		database.connect();
 	}
 
 	public void disconnect() {
-		database.disconnect();
+		if (database != null) {
+			database.disconnect();
+		}
 	}
 
 	/* study functions */

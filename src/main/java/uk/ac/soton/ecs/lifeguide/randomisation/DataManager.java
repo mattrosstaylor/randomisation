@@ -19,12 +19,13 @@ public class DataManager {
 	private static SessionFactory factory;
 	private Session session;
 
-	public DataManager(String whatev, String whatevs, String seriously, String whatever) throws PersistenceException {
+	public DataManager() throws PersistenceException {
 	
 		try {
+
 			factory = new AnnotationConfiguration().
 				configure().
-				addPackage("uk.ac.soton.ecs.lifeguide.randomisation"). //add package if used.
+				addPackage("uk.ac.soton.ecs.lifeguide.randomisation").
 				addAnnotatedClass(Trial.class).
 				addAnnotatedClass(Participant.class).
 				addAnnotatedClass(Arm.class).
