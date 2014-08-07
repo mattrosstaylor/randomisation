@@ -127,6 +127,11 @@ public class CommandLineAPI {
 			throw new PersistenceException("No such trial: "+ trialName);
 		}
 
+		Participant participant = database.getParticipant(trialName, participantIdentifier);
+		if (participant != null) {
+			throw new AllocationException(participantIdentifier +" has already been allocated.");
+		}
+
 		String data;
 
 		if (dataPath != null) {
@@ -136,7 +141,7 @@ public class CommandLineAPI {
 			data = null;
 		}
 
-		Participant participant = new Participant();
+		participant = new Participant();
 		participant.setIdentifier(participantIdentifier);
 		participant.setData(data);
 	
