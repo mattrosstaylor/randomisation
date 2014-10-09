@@ -14,6 +14,7 @@ public class CommandLineAPI {
 
 	public static final String REGISTER_TRIAL = "register_trial";
 	public static final String ADD_PARTICIPANT = "add_participant";
+	public static final String SPAM_PARTICIPANTS = "spam";
 	public static final String GET_ALLOCATION = "get_allocation";
 	public static final String COMMAND_FAILURE = "failure";
 	public static final String COMMAND_SUCCESS = "success";
@@ -74,6 +75,12 @@ public class CommandLineAPI {
 				}
 			}
 
+			if (args[0].equals(SPAM_PARTICIPANTS)) {
+				if (args.length == 3) {
+					result = api.spamParticipants(args[1], Integer.parseInt(args[2]));
+				}
+			}
+
 			json.put("status", COMMAND_SUCCESS);
 
 		}
@@ -83,6 +90,8 @@ public class CommandLineAPI {
 			json.put("status", COMMAND_FAILURE);
 			json.put("message", e.getClass().getSimpleName() +": " +e.getMessage());
 			json.put("stacktrace", s);
+
+			e.printStackTrace();
 		}
 		finally {
 			api.disconnect();	
@@ -154,6 +163,25 @@ public class CommandLineAPI {
 		Arm allocatedArm = trial.allocate(participant, database);
 
 		return allocatedArm.getName();
+	}
+
+	/* participant functions */
+	public String spamParticipants(String trialName, int max) throws AllocationException, PersistenceException, InvalidTrialException, FileNotFoundException {
+		Trial trial = database.getTrial(trialName);
+		if (trial == null) {
+			throw new PersistenceException("No such trial: "+ trialName);
+		}
+
+		for (int i = 0; i<max; i++) {
+			try {
+				System.out.println(addParticipant(trialName, ""+i, null));
+			}
+			catch(AllocationException e) {
+				max++;
+			}
+		}
+
+		return "YEAH!!!";
 	}
 
 	public String removeParticipant(String trialId, String participantId) {

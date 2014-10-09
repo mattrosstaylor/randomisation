@@ -29,11 +29,9 @@ public class SimpleRandomisation extends Strategy {
 	protected Arm allocateImplementation(Trial trial,
 										 Participant participant,
 										 DataManager database) throws PersistenceException {
-		Map<String, Double> strategyStatistics;
-
-		strategyStatistics = trial.getStatistics();
+		Map<String, Double> strategyStatistics = trial.getStatistics();
 		String stratifiedEnum = trial.getStrata(participant);
-		List<Integer> allocations = new ArrayList<Integer>(trial.getArms().size());
+		List<Integer> allocations = new ArrayList<Integer>(trial.getArms().size()); //mrt - change this to a map
 		for (Arm a : trial.getArms()) {
 			String enumString = getAllocationStatisticName(a.getName(), stratifiedEnum);
 			Double strategyStatistic = strategyStatistics.get(enumString);
@@ -42,9 +40,9 @@ public class SimpleRandomisation extends Strategy {
 		}
 		int sum = 0;
 		List<Arm> arms = trial.getArms();
-		for (Arm treatment : arms) {
-			if (treatment.getMaxParticipants() > allocations.get(arms.indexOf(treatment))) {
-				sum += treatment.getWeight();
+		for (Arm a : arms) {
+			if (a.getMaxParticipants() > allocations.get(arms.indexOf(a))) {
+				sum += a.getWeight();
 			}
 		}
 

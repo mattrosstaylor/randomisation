@@ -171,6 +171,16 @@ public class Trial {
 			}
 		}
 
+		output += "\nStatistics: ";
+		if (statistics.size() == 0) {
+			output += "\nNone";
+		}
+		else {
+			for (String key : statistics.keySet()) {
+				output += "\n" + key + " = " + statistics.get(key);
+			}
+		}
+
 		// mrt - cluster factors are never used
 /*        output += "\n\nClustered?: " + readableBoolean(isClustered());
 		if (isClustered()) {
