@@ -43,10 +43,11 @@ public class Minimisation extends Strategy {
 	private static final Logger logger = LoggerFactory.getLogger(Minimisation.class);
 
 	final String keywordProbabilistic = "certainty";
+	private Random rand = new Random();
 
-	public Arm getMinIntervention(Map<Arm, Double> scores) {
+	public Arm getAllocatedArm(Trial trial, Map<Arm, Double> scores) {
 		
-		ArrayList<Arm> smallestArms = new ArrayList<Arm>();  //List that stores the index of those scores which have same value
+		List<Arm> smallestArms = new ArrayList<Arm>();  //List that stores the index of those scores which have same value
 		smallestArms.add(null); //Add the error return value to the list if there is something wrong happening
 		double min = Double.MAX_VALUE;  //Init min to be the maximum double value
 		
@@ -60,38 +61,25 @@ public class Minimisation extends Strategy {
 				min = scores.get(a);
 			}
 		}
-		return smallestArms.get(new Random().nextInt(smallestArms.size()));
-	}
 
-	private boolean haveNonInfinite(double [] score) {
-		boolean ret_val = false;
-
-		for(int i = 0; i < score.length;i++) {
-			   if(Double.isInfinite(score[i]) == false) {
-				   ret_val = true;
-			   }
-		}
-		return ret_val;
-	}
-
-	private int getProbIntervention(int index, double[] score, double prob) {
-		int ret_val = index; //The index which have the probability prob to be chosen
-		ArrayList<Integer> list = new ArrayList<Integer>();
-		for(int i = 0; i < score.length;i++) {
-			if(i != index) {
-				list.add(i);
+		List<Arm> optionArms;
+		if (rand.nextDouble() > trial.getParameters().get(keywordProbabilistic)) {
+			optionArms = new ArrayList<Arm>();
+			for (Arm a: scores.keySet()) {
+				if (!smallestArms.contains(a)){
+					optionArms.add(a);
+				}
+			}
+			if (optionArms.size() == 0){
+				optionArms = smallestArms;
 			}
 		}
-		Random rand = new Random();
-		if(!(prob+1E-9 >1.0) && rand.nextDouble() > prob && haveNonInfinite(score)) {
-			do {
-			Collections.shuffle(list,rand);
-			ret_val = list.get(0);
-			}while(Double.isInfinite(score[ret_val]));
+		else {
+			optionArms = smallestArms;
 		}
-		return ret_val;
-	}
 
+		return optionArms.get(new Random().nextInt(optionArms.size()));
+	}
 
 	private String getStratStatString(Arm arm, Attribute attr, Double value) {
 		return "(" +attr.getName() +" " +attr.getGroupingNameForValue(value) +") " +arm.getName();
@@ -124,9 +112,9 @@ public class Minimisation extends Strategy {
 			}
 		}
 
-		Arm minimalArm = getMinIntervention(scores);
+		Arm allocatedArm = getAllocatedArm(trial, scores);
 
-		return minimalArm;
+		return allocatedArm;
 
 		// mrt - removing probablistic bullshit
 /*
@@ -140,7 +128,7 @@ public class Minimisation extends Strategy {
 		}
 		Double probabilistic = stats.getStatistic(keywordProbabilistic);
 		if(probabilistic == null) {
-			probabilistic = 1.00000f;
+			probabilistic = 1.000000000000000000f;
 		}
 
 		index = getProbIntervention(index,score,probabilistic);//The probabilistic choosing method
@@ -215,7 +203,6 @@ public class Minimisation extends Strategy {
 				}
 			}
 		}
-		//ret_val.put(keywordProbabilistic, 1.0);
 		return ret_val;
 	}
 

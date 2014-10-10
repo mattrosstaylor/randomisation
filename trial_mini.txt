@@ -1,4 +1,5 @@
 Method: Minimisation
+certainty: 0.8
 
 Stratify: height, weight
 
@@ -7,7 +8,7 @@ Weight: control 1
 Weight: one 2
 Weight: two 2
 
-Limit: one 100 
+#Limit: one 100 
 
 Group: height
 <100
