@@ -7,7 +7,7 @@ Weight: control 1
 Weight: one 2
 Weight: two 2
 
-#Limit: control 8
+Limit: control 8
 
 #Group: height
 #<100

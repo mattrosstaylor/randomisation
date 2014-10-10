@@ -43,65 +43,24 @@ public class Minimisation extends Strategy {
 	private static final Logger logger = LoggerFactory.getLogger(Minimisation.class);
 
 	final String keywordProbabilistic = "certainty";
-	//Map<String, Double> stats = null;
-
-	public Minimisation() {
-	}
-/*
-	public Minimisation(Trial trial) {
-		this.stats = resetMap<String, Double>(trial, new StrategyMap<String, Double>());
-	}
-
-	private Map<String, Double> resetMap<String, Double>(Trial trial, StrategyMap<String, Double> stats) {
-
-		for (Arm arm : trial.getArms()) {
-			for (Attribute attribute : trial.getAttributes()) {
-				for (int i = 0; i < attribute.getGroupCount(); i++) {
-					String put_string = new String(arm.getName() + attribute.getName() + i);
-					stats.putStatistic(put_string, 0.0f);
-				}
-			}
-		}
-		this.stats.putStatistic(keywordProbabilistic,1.0000000f);
-		return this.stats;
-	}
-
-	private Map<String, Double> getStats(Trial trial, DataManager database) throws SQLException{
-		Map<String, Double> stats1 = null;
-		if (database != null) {
-			stats1 = database.getStrategyMap<String, Double>(trial);
-		} else {
-			stats1 = this.stats;
-//			logger.error("No database connector specified, will throw exception unless this is testing\n");
-		}
-		return stats1;
-	}
-
-	public void put_stat(StrategyMap<String, Double> stats) {
-		this.stats = stats;
-	}
-*/
 
 	public Arm getMinIntervention(Map<Arm, Double> scores) {
 		
-		ArrayList<Arm> listOfSameMinValue = new ArrayList<Arm>();  //List that stores the index of those scores which have same value
-		listOfSameMinValue.add(null); //Add the error return value to the list if there is something wrong happening
+		ArrayList<Arm> smallestArms = new ArrayList<Arm>();  //List that stores the index of those scores which have same value
+		smallestArms.add(null); //Add the error return value to the list if there is something wrong happening
 		double min = Double.MAX_VALUE;  //Init min to be the maximum double value
 		
 		for (Arm a: scores.keySet()) {
 			if(scores.get(a) == min) {
-				listOfSameMinValue.add(a);
+				smallestArms.add(a);
 			} 
 			else if(scores.get(a) < min) {
-				listOfSameMinValue.clear();   //New min value, so clear the list of min values
-				listOfSameMinValue.add(a);    //Add the new index
+				smallestArms.clear();   //New min value, so clear the list of min values
+				smallestArms.add(a);    //Add the new index
 				min = scores.get(a);
 			}
 		}
-		//If there is more than one value which have the smallest score, it will shuffle the list to get a random order of them.
-		Collections.shuffle(listOfSameMinValue,new Random());
-		//Return the 0th index as the chosen intervention
-		return listOfSameMinValue.get(0);
+		return smallestArms.get(new Random().nextInt(smallestArms.size()));
 	}
 
 	private boolean haveNonInfinite(double [] score) {
@@ -133,87 +92,36 @@ public class Minimisation extends Strategy {
 		return ret_val;
 	}
 
-	public boolean canAllocateToArm(Trial trial, Arm arm) {
-		boolean ret_val = true;
-		if(arm.getParticipantLimit()) {
-		   ret_val = false;
-		}
-		//if no limit
-		if(ret_val == true) {
-			return ret_val;
-		}
 
-
-		List<Attribute> attributes = trial.getAttributes();
-		Attribute attribute = attributes.get(0);
-		int groups = attribute.getNumberOfGroups();
-		double score = 0;
-		for(int i = 0; i < groups;i++) {
-			String get_string =  arm.getName()+attribute.getName()+i;
-			if(trial.getStatistics().get(get_string) != null) {
-				score += trial.getStatistics().get(get_string);
-			}
-		}
-		if(((int)score) < arm.getMaxParticipants()) {
-			ret_val = true;
-		}
-		logger.debug("Arm "+arm.getName()+" has "+score+" participants\n");
-		return ret_val;
-	}
-
-/*
-	private String getStrataString(Trial trial, Participant participant) {
-		String strata = "";
-
-		if(trial.getStratifiedCount() > 1) {
-			strata= Integer.toString(trial.getStratifiedEnumeration(participant));
-		}
-		return strata;
-	}
-*/
-	// mrt - strata is redundant
-	private String getStratStatString(String strata,Arm arm, Attribute attr, Double value) {
-		//return arm.getName()+ " " +attr.getName() + attr.getGroupingNameForValue(value);
+	private String getStratStatString(Arm arm, Attribute attr, Double value) {
 		return "(" +attr.getName() +" " +attr.getGroupingNameForValue(value) +") " +arm.getName();
 	}
-
-
 
 	public Arm getAllocation(Trial trial,Participant participant, DataManager database) {
 		List<Arm> arms = trial.getArms();
 
 		Map<Arm, Double> scores = new HashMap<Arm, Double>();
 
-		//StrategyMap<String, Double> stats = getStats(trial,participant,database);
-
 		for (Arm arm: arms) {
-			scores.put(arm, 0.0);
+			if (trial.getStatistics().get(getAllocationStatisticName(arm.getName(), "")) < arm.getMaxParticipants()) {
 
-			for (Attribute attr: trial.getAttributes()) {
+				scores.put(arm, 0.0);
 
-				String get_string = getStratStatString(
-					trial.getStrata(participant),
-					arm,
-					attr, 
-					participant.getResponse(attr.getName())
-				);
-				Double stat = trial.getStatistics().get(get_string);
+				for (Attribute attr: trial.getAttributes()) {
 
-				if (stat != null) {
-					scores.put(arm, scores.get(arm) + stat*attr.getWeight());
+					String get_string = getStratStatString(
+						arm,
+						attr, 
+						participant.getResponse(attr.getName())
+					);
+					Double stat = trial.getStatistics().get(get_string);
+
+					if (stat != null) {
+						scores.put(arm, scores.get(arm) + stat*attr.getWeight());
+					}
 				}
+				scores.put(arm, scores.get(arm)/arm.getWeight());
 			}
-			scores.put(arm, scores.get(arm)/arm.getWeight());
-
-			//String logOutput ="Score "+score[index]+ " index " +index+" for arm: "+arm.getName()+"\n";
-			//logger.debug(logOutput);
-			
-
-			// mrt - this is probably gay
-		//	if(canAllocateToArm(trial,arm,stats) == false) {
-		//		score[index] = Double.POSITIVE_INFINITY;
-		//	}
-
 		}
 
 		Arm minimalArm = getMinIntervention(scores);
@@ -254,39 +162,24 @@ public class Minimisation extends Strategy {
 	@Override
 	protected Arm allocateImplementation(Trial trial, Participant participant, DataManager database) throws PersistenceException {
 
-		// mrt - this is just an error check - our data is legit, son!
-		/*	for(Attribute attr : trial.getAttributes()) {
-			if(attr.isGroupingFactor()) {
-				if(participant.getResponses().get(attr.getName()) == null) {
-					  logger.error(" Participants are missing "+ attr.getName() +" in their response data ");
-					throw new PersistenceException("Participants are missing "+ attr.getName() +" in their response data ");
-				}
-			}
-		}
-		*/
-
-
 		Arm arm = getAllocation(trial, participant, database);
 
 		for (Attribute attr: trial.getAttributes()) {
 			String put_string = getStratStatString(
-				trial.getStrata(participant),
 				arm,
 				attr,
 				participant.getResponse(attr.getName()));
 
-			if(trial.getStatistics().get(put_string) != null) {
-				trial.getStatistics().put(put_string, trial.getStatistics().get(put_string) + 1.0);
-			} else {
-				trial.getStatistics().put(put_string, 1.0);
-			}
+			trial.getStatistics().put(put_string, trial.getStatistics().get(put_string) + 1.0);
 		}
+
+		trial.getStatistics().put(
+			getAllocationStatisticName(arm.getName(),""),
+			trial.getStatistics().get(getAllocationStatisticName(arm.getName(),"")) + 1.0
+		);
 		
 		database.update(trial, participant, arm);
 
-
-
-		//return index; // mrt - fuck youuuuuu!
 		return arm;
 	}
 
@@ -313,13 +206,12 @@ public class Minimisation extends Strategy {
 	@Override
 	protected Map<String, Double> getStoredParametersImplementation(Trial trial) {
 		Map<String, Double> ret_val = new HashMap<String, Double>();
-		for (String strata: trial.getAllStrata()) {
-			for (Arm arm : trial.getArms()) {
-				for (Attribute attribute : trial.getAttributes()) {
-					for (Grouping g : attribute.getGroupings()) {
-						String put_string = getStratStatString(strata, arm, attribute, g.getMinimum());
-						ret_val.put(put_string, 0.0);
-					}
+		for (Arm arm : trial.getArms()) {
+			ret_val.put(getAllocationStatisticName(arm.getName(), ""), 0.0);
+			for (Attribute attribute : trial.getAttributes()) {
+				for (Grouping g : attribute.getGroupings()) {
+					String put_string = getStratStatString(arm, attribute, g.getMinimum());
+					ret_val.put(put_string, 0.0);
 				}
 			}
 		}
