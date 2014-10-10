@@ -85,14 +85,14 @@ public class SimpleRandomisation extends Strategy {
 		return params;
 	}
 
-	private String getAllocationStatisticName(String armName, String strataName) {
-		String result = armName +" allocations";
+	// private String getAllocationStatisticName(String armName, String strataName) {
+	// 	String result = armName +" allocations";
 		
-		if (!strataName.equals("")) {
-			result +=" (" +strataName +")";
-		} 
-		return result;
-	}
+	// 	if (!strataName.equals("")) {
+	// 		result +=" (" +strataName +")";
+	// 	} 
+	// 	return result;
+	// }
 
 	//@Override
 	// protected Map<String, Double> getStoredParametersImplementation() {

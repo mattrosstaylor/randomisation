@@ -119,6 +119,15 @@ public abstract class Strategy {
 	 */
 	protected abstract Map<String, Double> getStoredParametersImplementation(Trial trial);
 
+	protected String getAllocationStatisticName(String armName, String strataName) {
+		String result = armName +" allocations";
+		
+		if (!strataName.equals("")) {
+			result +=" (" +strataName +")";
+		} 
+		return result;
+	}
+
 	/**
 	 * This method is called when loading in any trial which wishes to use this strategy. Allows a specific Strategy
 	 * subclass to implement checks specific to their allocation process. If a check does not pass, this method

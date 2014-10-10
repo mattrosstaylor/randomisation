@@ -194,24 +194,23 @@ public class BlockedRandomisation extends Strategy {
 				throw new InvalidTrialException("The treatment group ratio does not divide evenly into the block size.");
 			}
 			//trialDefinition.getStrategyParams().put("delta", trialDefinition.getParameters().get("delta") / totalRatio);
-
 		}
 	}
 
-	private String getAllocationStatisticName(String armName, String strataName) {
-		String result = armName +" allocations";
+	// private String getAllocationStatisticName(String armName, String strataName) {
+	// 	String result = armName +" allocations";
 		
-		if (!strataName.equals("")) {
-			result +=" (" +strataName +")";
-		} 
-		return result;
-	}
+	// 	if (!strataName.equals("")) {
+	// 		result +=" (" +strataName +")";
+	// 	} 
+	// 	return result;
+	// }
 
 	private String getStatisticName(String statName, String strataName) {
 		String result = statName;
 		
 		if (!strataName.equals("")) {
-			result +=" (" +strataName +")";
+			result = "(" +strataName +") " +result;
 		} 
 		return result;
 	}

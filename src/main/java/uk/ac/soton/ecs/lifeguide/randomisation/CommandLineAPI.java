@@ -159,6 +159,8 @@ public class CommandLineAPI {
 		Random r = new Random();
 		data = "{'height': '" + (50+r.nextInt(2)*100) +"', 'weight': '"+(25+r.nextInt(3)*50) +"'}";
 
+		System.out.println(data);
+		
 		participant = new Participant();
 		participant.setIdentifier(participantIdentifier);
 		participant.setData(data);
