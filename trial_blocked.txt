@@ -1,22 +1,26 @@
 Method: BlockedRandomisation
+blocksize: 36
+delta: 9
 
-#Stratify: height weight horseness
+Stratify: height, weight
 
-Arms: control one two
+Arms: control one two three subcontrol
 Weight: control 1
 Weight: one 2
 Weight: two 2
+Weight: three 3
+Weight subcontrol 1
 
-Limit: control 1
+Limit: control 20
 
-#Group: height
-#<100
-#>100
+Group: height
+<100
+>100
 
-#Group: weight
-#<50
-#50 to 100
-#>100
+Group: weight
+<50
+50 to 100
+>100
  
 #Group: horseness
 #<1

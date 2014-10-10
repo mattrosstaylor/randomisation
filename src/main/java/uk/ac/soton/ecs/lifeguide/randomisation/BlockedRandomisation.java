@@ -54,6 +54,7 @@ public class BlockedRandomisation extends Strategy {
 										 Participant participant,
 										 DataManager database) throws PersistenceException {
 		Map<String, Double> strategyStatistics = trial.getStatistics();
+		Map<String, Double> trialParameters = trial.getParameters();
 		String stratifiedEnum = trial.getStrata(participant);
 		Map<Arm, Integer> allocations = new HashMap<Arm, Integer>();
 		for (Arm a : trial.getArms()) {
@@ -62,16 +63,17 @@ public class BlockedRandomisation extends Strategy {
 			int roundedVal = (int)(Math.round(strategyStatistic));
 			allocations.put(a, roundedVal);
 		}
-		int sum = 0;
+		int activeSum = 0, sum = 0;
 		List<Arm> arms = trial.getArms();
 		for (Arm a : arms) {
 			if (a.getMaxParticipants() > allocations.get(a)) {
-				sum += a.getWeight();
+				activeSum += a.getWeight();
 			}
+			sum += a.getWeight();
 		}
 
 		//Trial full
-		if (sum == 0) {
+		if (activeSum == 0) {
 			logger.debug("Trial full.");
 			return trial.getDefaultArm();
 		}
@@ -79,14 +81,13 @@ public class BlockedRandomisation extends Strategy {
 		int blockSize, delta, sum_in, actualSize, counter;
 		long seed;
 		
-		blockSize = (int) Math.round(strategyStatistics.get("blocksize"));
-		delta = (int) Math.round(strategyStatistics.get("delta"));
-		sum_in = (int) Math.round(strategyStatistics.get("sum"));
-		blockSize = blockSize / sum_in;
-		delta = delta / sum_in;
-		actualSize = (int) Math.round(strategyStatistics.get(stratifiedEnum + "_actualsize"));
-		seed = Double.doubleToLongBits(strategyStatistics.get(stratifiedEnum + "_seed"));
-		counter = actualSize == 0 ? -1 : (int) Math.round(strategyStatistics.get(stratifiedEnum + "_counter"));
+		blockSize = (int) Math.round(trialParameters.get("blocksize"));
+		delta = (int) Math.round(trialParameters.get("delta"));
+		blockSize = blockSize / sum;
+		delta = delta / sum;
+		actualSize = (int) Math.round(strategyStatistics.get(getStatisticName("size", stratifiedEnum)));
+		seed = Double.doubleToLongBits(strategyStatistics.get(getStatisticName("seed", stratifiedEnum)));
+		counter = actualSize == 0 ? -1 : (int) Math.round(strategyStatistics.get(getStatisticName("counter", stratifiedEnum)));
 		
 		List<Arm> block;
 		//Algorithm
@@ -100,8 +101,8 @@ public class BlockedRandomisation extends Strategy {
 					delta = blockSize / 2; // mrt - default (-1) delta is half the block size
 				}
 				blockSize = blockSize - delta + random.nextInt(2 * delta + 1);
-				actualSize = blockSize * sum_in;
-				logger.debug("Sum of weights: {}, size of block by sum: {}.", sum_in, blockSize);
+				actualSize = blockSize * sum;
+				logger.debug("Sum of weights: {}, size of block by sum: {}.", sum, blockSize);
 				block = new ArrayList<Arm>(actualSize);
 				for (Arm a : arms) {
 					for (int j = 0; j < a.getWeight() * blockSize; j++) {
@@ -109,17 +110,18 @@ public class BlockedRandomisation extends Strategy {
 					}
 				}
 				logger.debug("Actual block size: {}.", block.size());
-				seed = random.nextLong();
+				double serialisedSeed = random.nextDouble();
+				seed = Double.doubleToLongBits(serialisedSeed);
 				Collections.shuffle(block, new Random(seed));
 				logger.debug("Block shuffle:\n<{}>", block);
 				counter = 0;
-				strategyStatistics.put(stratifiedEnum + "_actualsize", Double.valueOf(actualSize));
-				strategyStatistics.put(stratifiedEnum + "_seed", Double.longBitsToDouble(seed));
+				strategyStatistics.put(getStatisticName("size", stratifiedEnum), Double.valueOf(actualSize));
+				strategyStatistics.put(getStatisticName("seed", stratifiedEnum), serialisedSeed);
 			}
 			else {
 				block = new ArrayList<Arm>(actualSize);
 				for (Arm a : arms) {
-					for (int j = 0; j < a.getWeight() * (actualSize / sum_in); j++) {
+					for (int j = 0; j < a.getWeight() * (actualSize / sum); j++) {
 						block.add(a);
 					}
 				}
@@ -128,9 +130,8 @@ public class BlockedRandomisation extends Strategy {
 
 			while (arm == null && counter < actualSize) {
 				arm = block.get(counter);
-				System.out.println(arm.toString());
 				counter++;
-				
+
 				// mrt - ignore this for now - we need to change allocations to a Map<Arm, Integer>
 				//If selected treatment have not reached limit finish
 				if (allocations.get(arm) >= arm.getMaxParticipants()) {
@@ -139,7 +140,7 @@ public class BlockedRandomisation extends Strategy {
 			}
 		}
 
-		strategyStatistics.put(stratifiedEnum + "_counter", Double.valueOf(counter));
+		strategyStatistics.put(getStatisticName("counter", stratifiedEnum), Double.valueOf(counter));
 		strategyStatistics.put(getAllocationStatisticName(arm.getName(), stratifiedEnum), Double.valueOf(allocations.get(arm) + 1));
 
 		database.update(trial, participant, arm);
@@ -158,21 +159,16 @@ public class BlockedRandomisation extends Strategy {
 	@Override
 	protected Map<String, Double> getStoredParametersImplementation(Trial trial) {
 		Map<String, Double> names = new HashMap<String, Double>();
-		names.put("blocksize", 10.0);
-		names.put("delta", 5.0);
+		//names.put("blocksize", 10.0);
+		//names.put("delta", 5.0);
 		for (String strata: trial.getAllStrata()) {
-			names.put(strata + "_actualsize", 0.0);
-			names.put(strata + "_seed", Double.longBitsToDouble(random.nextLong()));
-			names.put(strata + "_counter", 0.0);
+			names.put(getStatisticName("size", strata), 0.0);
+			names.put(getStatisticName("seed", strata), 0.0);
+			names.put(getStatisticName("counter", strata), 0.0);
 			for (Arm a : trial.getArms()) {
-				names.put(getAllocationStatisticName(a.getName(), strata), 0.0); // mrt - this is obviously fucked
+				names.put(getAllocationStatisticName(a.getName(), strata), 0.0);
 			}
 		}
-		double totalRatio = 0;
-		for (Arm a : trial.getArms()) {
-			totalRatio += a.getWeight();
-		}
-		names.put("sum", totalRatio);
 		return names;
 	}
 
@@ -204,6 +200,15 @@ public class BlockedRandomisation extends Strategy {
 
 	private String getAllocationStatisticName(String armName, String strataName) {
 		String result = armName +" allocations";
+		
+		if (!strataName.equals("")) {
+			result +=" (" +strataName +")";
+		} 
+		return result;
+	}
+
+	private String getStatisticName(String statName, String strataName) {
+		String result = statName;
 		
 		if (!strataName.equals("")) {
 			result +=" (" +strataName +")";

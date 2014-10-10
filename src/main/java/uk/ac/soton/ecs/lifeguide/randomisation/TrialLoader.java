@@ -372,7 +372,7 @@ public class TrialLoader{
 		// ====================================================================================
 		// Check all required parameters are present, and all present parameters are required.
 		// ====================================================================================
-		List<String> requiredParams = Strategy.getRequiredParameters(strategyClass);
+		List<String> requiredParams = Strategy.getRequiredParameters(Strategy.create(strategyName).getClass());
 
 		for (String userParam : strategyParams.keySet()) {
 			boolean found = false;
