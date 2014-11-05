@@ -4,6 +4,9 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "groupings")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="type", discriminatorType=DiscriminatorType.STRING)
+@DiscriminatorValue("discrete")
 public class Grouping {
 
 	@Id @GeneratedValue
@@ -17,21 +20,11 @@ public class Grouping {
 	@Column(name="name")
 	private String name;
 
-	@Column(name="minimum")
-	private double minimum;
-
-	@Column(name="maximum")
-	private double maximum;
-	
-	/* constructors */
-
 	public Grouping() {
 	}
 
-	public Grouping(String name, double minimum, double maximum) {
+	public Grouping(String name) {
 		this.name = name;
-		this.minimum = minimum;
-		this.maximum = maximum;
 	}
 
 	/* getters and setters */
@@ -45,9 +38,13 @@ public class Grouping {
 	public String getName() { return name; }
 	public void setName(String name) { this.name = name; }
 
-	public double getMinimum() { return minimum; }
-	public void setMinimum(double minimum) { this.minimum = minimum; }
+	/* methods */
 
-	public double getMaximum() { return maximum; }
-	public void setMaximum(double maximum) { this.maximum = maximum; }
+	public boolean inGrouping(String s){
+		return name.equals(s);
+	}
+
+	public String getValidValue() {
+		return name;
+	}
 }

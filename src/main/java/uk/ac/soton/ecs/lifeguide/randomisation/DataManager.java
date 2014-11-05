@@ -31,6 +31,7 @@ public class DataManager {
 				addAnnotatedClass(Arm.class).
 				addAnnotatedClass(Attribute.class).
 				addAnnotatedClass(Grouping.class).
+				addAnnotatedClass(RangeGrouping.class).
 				buildSessionFactory();
 		}
 		catch (Exception e) { 

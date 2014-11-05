@@ -107,19 +107,17 @@ public class Trial {
 		
 		boolean notFirst = false;
 		for (Attribute attribute : attributes) {
-			if (attribute.isGroupingFactor() == true) {
-				if (notFirst) {
-					result += ", ";
-				}
-				else{
-					notFirst = true;
-				}
-				result += attribute.getName();
-
-				double response = participant.getResponse(attribute.getName());
-
-				result += " "+attribute.getGroupingNameForValue(response);
+			if (notFirst) {
+				result += ", ";
 			}
+			else{
+				notFirst = true;
+			}
+			result += attribute.getName();
+
+			String response = participant.getResponse(attribute.getName());
+
+			result += " "+attribute.getGroupingNameForValue(response);
 		}
 		return result;
 	}
@@ -130,25 +128,24 @@ public class Trial {
 
 		boolean notFirst = false;
 		for (Attribute attribute : attributes) {
-			if (attribute.isGroupingFactor() == true) {
-				List<String> newResult = new ArrayList<String>();
+			
+			List<String> newResult = new ArrayList<String>();
 
-				for (String strata : result){
-					if (notFirst) {
-						strata += ", ";
-					}
-					else{
-						notFirst = true;
-					}
-					strata += attribute.getName();
-
-					for (String groupingName : attribute.getAllGroupingNames()){
-						newResult.add(strata + " "+groupingName);
-					}
+			for (String strata : result){
+				if (notFirst) {
+					strata += ", ";
 				}
+				else{
+					notFirst = true;
+				}
+				strata += attribute.getName();
 
-				result = newResult;
+				for (String groupingName : attribute.getAllGroupingNames()){
+					newResult.add(strata + " "+groupingName);
+				}
 			}
+
+			result = newResult;
 		}
 		return result;
 	}

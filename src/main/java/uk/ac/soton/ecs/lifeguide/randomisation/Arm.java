@@ -47,8 +47,8 @@ public class Arm {
 		else {
 			this.participantLimit = false;
 		}
-		
 	}
+	
 	/* methods */
 
 	public String toString() {

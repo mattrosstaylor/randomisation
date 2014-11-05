@@ -81,7 +81,7 @@ public class Minimisation extends Strategy {
 		return optionArms.get(new Random().nextInt(optionArms.size()));
 	}
 
-	private String getStratStatString(Arm arm, Attribute attr, Double value) {
+	private String getStratStatString(Arm arm, Attribute attr, String value) {
 		return "(" +attr.getName() +" " +attr.getGroupingNameForValue(value) +") " +arm.getName();
 	}
 
@@ -168,7 +168,7 @@ public class Minimisation extends Strategy {
 			ret_val.put(getAllocationStatisticName(arm.getName(), ""), 0.0);
 			for (Attribute attribute : trial.getAttributes()) {
 				for (Grouping g : attribute.getGroupings()) {
-					String put_string = getStratStatString(arm, attribute, g.getMinimum());
+					String put_string = getStratStatString(arm, attribute, g.getValidValue());
 					ret_val.put(put_string, 0.0);
 				}
 			}

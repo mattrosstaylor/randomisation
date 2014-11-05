@@ -64,8 +64,8 @@ public class TrialLoader{
 					JSONArray groupingsData = attributeData.getJSONArray("groupings");
 					for (int j=0; j<groupingsData.length(); j++) {
 						JSONObject groupingData = groupingsData.getJSONObject(j);
-						double min = -Double.MAX_VALUE;
-						double max = Double.MAX_VALUE;
+						double min = RangeGrouping.DEFAULT_MIN;
+						double max = RangeGrouping.DEFAULT_MAX;
 						try {
 							min = groupingData.getDouble("min");
 						}
@@ -74,21 +74,22 @@ public class TrialLoader{
 							max = groupingData.getDouble("max");
 						}
 						catch (JSONException e) {}
-						
-						String name = null;
-						if (min != -Double.MAX_VALUE && max != Double.MAX_VALUE) {
-							name = "" +min +" to " +max;
+						try {
+							groupings.add(new Grouping(groupingData.getString("value")));
 						}
-						else if (min != -Double.MAX_VALUE && max == Double.MAX_VALUE) {
-							name = "min " +min;
+						catch (JSONException e) {
+							groupings.add(new RangeGrouping(min, max));
 						}
-						else if (min == -Double.MAX_VALUE && max != Double.MAX_VALUE) {
-							name = "max " +max;
-						}
-						
-						groupings.add(new Grouping(name, min, max));
 					}
-					t.addAttribute(new Attribute(attributeData.getString("name"),groupings,1,true));
+
+					double priority = 1.0;
+
+					try {
+						priority = attributeData.getDouble("priority");
+					}
+					catch (JSONException e) {}
+
+					t.addAttribute(new Attribute(attributeData.getString("name"),groupings,priority));
 				}
 			} else {
 				parameters.put(key,json.getDouble(key));

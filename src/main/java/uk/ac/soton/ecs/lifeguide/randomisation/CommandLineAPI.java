@@ -155,7 +155,7 @@ public class CommandLineAPI {
 		}
 
 		Random r = new Random();
-		data = "{'height': '" + (50+r.nextInt(100)) +"', 'weight': '"+(25+r.nextInt(100)) +"'}";
+		data = "{'height': '" + (50+r.nextInt(100)) +"', 'weight': '"+(25+r.nextInt(100)) +"', 'isAlpaca': '"+ (r.nextInt(2) > 0 ? "yes" : "no") +"'}";
 
 		System.out.println(data);
 

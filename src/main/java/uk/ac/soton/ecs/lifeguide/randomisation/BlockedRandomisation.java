@@ -56,6 +56,9 @@ public class BlockedRandomisation extends Strategy {
 		Map<String, Double> strategyStatistics = trial.getStatistics();
 		Map<String, Double> trialParameters = trial.getParameters();
 		String stratifiedEnum = trial.getStrata(participant);
+
+		System.out.println(stratifiedEnum);
+
 		Map<Arm, Integer> allocations = new HashMap<Arm, Integer>();
 		for (Arm a : trial.getArms()) {
 			String enumString = getAllocationStatisticName(a.getName(), stratifiedEnum);

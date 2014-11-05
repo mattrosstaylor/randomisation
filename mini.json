@@ -1,0 +1,27 @@
+{
+	"method": "Minimisation",
+	"certainty": 0.8,
+	"arms": [
+		{ "name": "control", "weight": 1 },
+		{ "name": "one", "weight": 2 },
+		{ "name": "two", "weight": 2 }
+	],
+	"attributes":[
+			{
+				"name":"weight",
+				"groupings":[
+					{ "max":50 },
+					{ "min":50, "max":100 },
+					{ "min":100 }
+				]
+			},
+			{
+				"name":"isAlpaca",
+				"priority": 2,
+				"groupings":[
+					{ "value": "yes" },
+					{ "value": "no" }
+				]
+			}
+	]
+}

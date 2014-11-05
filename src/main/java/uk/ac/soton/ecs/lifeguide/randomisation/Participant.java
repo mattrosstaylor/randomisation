@@ -30,11 +30,11 @@ public class Participant {
 	private JSONObject json = null;
 
 	/* crystal methods */
-	public Double getResponse(String key) {
+	public String getResponse(String key) {
 		if (json == null) {
 			json = new JSONObject(data);
 		}
-		return json.getDouble(key);
+		return json.getString(key);
 	}
 
 	/* getters and setters */
