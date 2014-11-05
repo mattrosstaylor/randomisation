@@ -22,7 +22,6 @@ public class CommandLineAPI {
 	private static final Logger logger = LoggerFactory.getLogger(CommandLineAPI.class);
 	private DataManager database;
 
-
 	private static String stackTraceToString(Throwable t) {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);

@@ -91,7 +91,10 @@ public class TrialLoader{
 
 					t.addAttribute(new Attribute(attributeData.getString("name"),groupings,priority));
 				}
-			} else {
+			} 
+			else if (key.equals("default_arm")) {
+			}
+			else {
 				parameters.put(key,json.getDouble(key));
 			}
 		}

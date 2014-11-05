@@ -51,25 +51,6 @@ public class Trial {
 	/* constructor */
     
     public Trial() {}
-/*
-	public Trial(	String name, String strategy,                                                                                                                     
-					Map<String, Double> parameters, List<Attribute> attributes,                                                                                                           
-					List<Arm> arms, int[] clusterFactors) {                                                                                               
-		this.name = name;
-		this.strategy = strategy;
-		this.parameters = parameters;
-		
-		for (Attribute a: attributes) {
-			addAttribute(a);
-		}
-		for (Arm a: arms) {
-			addArm(a);
-		}
-
-		// mrt - cluster factors do nothing - so who cares?
-		//this.clusterFactors = clusterFactors;
-	}
-	*/
 
 	/* functions, son */
 
@@ -179,14 +160,6 @@ public class Trial {
 			}
 		}
 
-		// mrt - cluster factors are never used
-/*        output += "\n\nClustered?: " + readableBoolean(isClustered());
-		if (isClustered()) {
-			output += "\nCluster factors:";
-			List<Attribute> clusterAttributes = getClusterFactors();
-			for (Attribute attr : clusterAttributes)
-				output += " " + attr.getAttributeName();
-		} */ 
 		output += "\nAttributes: ";
 		if (attributes.size() == 0) {
 			output +="\nNone";
@@ -204,7 +177,7 @@ public class Trial {
 	}
 
 	public Arm allocate(Participant participant, DataManager database) throws InvalidTrialException, uk.ac.soton.ecs.lifeguide.randomisation.exception.PersistenceException {
-		return Strategy.create(strategy).allocateImplementation(this, participant, database);
+		return Strategy.create(strategy).allocate(this, participant, database);
 	}
 
 	/* getters and setters */
