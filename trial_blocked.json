@@ -1,0 +1,25 @@
+{
+	"method":"BlockedRandomisation",
+	"blocksize":36,
+	"delta":9,
+	"arms":[
+		{ "name":"control", "weight":1, "limit":20 },
+		{ "name":"one", "weight":2 },
+		{ "name":"two", "weight":2 },
+		{ "name":"three", "weight":3 },
+		{ "name":"subcontrol", "weight":2 },
+	],
+	"attributes":[{
+		"name":"height",
+		"groupings":[
+			{ "max":100 },
+			{ "min":100 }
+		]},{
+		"name":"weight",
+		"groupings":[
+			{ "max":50 },
+			{ "min":50, "max":100 },
+			{ "min":100 }
+		]}
+	]
+}

@@ -159,8 +159,6 @@ public class BlockedRandomisation extends Strategy {
 	@Override
 	protected Map<String, Double> getStoredParametersImplementation(Trial trial) {
 		Map<String, Double> names = new HashMap<String, Double>();
-		//names.put("blocksize", 10.0);
-		//names.put("delta", 5.0);
 		for (String strata: trial.getAllStrata()) {
 			names.put(getStatisticName("size", strata), 0.0);
 			names.put(getStatisticName("seed", strata), 0.0);
@@ -186,25 +184,14 @@ public class BlockedRandomisation extends Strategy {
 			if (trial.getParameters().get("blocksize") % totalRatio != 0) {
 				throw new InvalidTrialException("The treatment group ratio does not divide evenly into the block size.");
 			}
-			//trialDefinition.getStrategyParams().put("blocksize", trialDefinition.getParameters().get("blocksize") / totalRatio);
 		}
 
 		if (trial.getParameters().get("delta") != null) {
 			if (trial.getParameters().get("delta") % totalRatio != 0) {
 				throw new InvalidTrialException("The treatment group ratio does not divide evenly into the block size.");
 			}
-			//trialDefinition.getStrategyParams().put("delta", trialDefinition.getParameters().get("delta") / totalRatio);
 		}
 	}
-
-	// private String getAllocationStatisticName(String armName, String strataName) {
-	// 	String result = armName +" allocations";
-		
-	// 	if (!strataName.equals("")) {
-	// 		result +=" (" +strataName +")";
-	// 	} 
-	// 	return result;
-	// }
 
 	private String getStatisticName(String statName, String strataName) {
 		String result = statName;

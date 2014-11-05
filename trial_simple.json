@@ -1,0 +1,9 @@
+{
+	"method":"SimpleRandomisation",
+	"arms":[
+		{ "name":"control", "weight":1, "limit":100 },
+		{ "name":"study1", "weight":2 },
+		{ "name":"study2", "weight":2 }
+	],
+	"default_arm": "study2"
+}

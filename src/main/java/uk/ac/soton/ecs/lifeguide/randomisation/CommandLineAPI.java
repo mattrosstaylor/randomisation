@@ -113,9 +113,7 @@ public class CommandLineAPI {
 	}
 
 	/* study functions */
-	public String registerTrial(String trialName, String definitionPath) throws PersistenceException, InvalidTrialException {
-		//Trial t = TrialLoader.loadTrial(definitionPath);
-		//System.out.println(t);
+	public String registerTrial(String trialName, String definitionPath) throws PersistenceException, InvalidTrialException, FileNotFoundException {
 
 		if (database.getTrial(trialName) == null) {
 			Trial trial = TrialLoader.loadTrial(definitionPath);

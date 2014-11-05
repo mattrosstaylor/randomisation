@@ -115,36 +115,6 @@ public class Minimisation extends Strategy {
 		Arm allocatedArm = getAllocatedArm(trial, scores);
 
 		return allocatedArm;
-
-		// mrt - removing probablistic bullshit
-/*
-
-		int old = index;
-		if(index == -1) {
-			logger.error("Minimisation returned -1, no intervention chosen\n");
-			throw new AllocationException("Error no intervention chosen for participant, likely limits for groups have been met");
-		} else {
-			logger.debug("Minimisation determined " + arms.get(index).getName() +" to be the most suitable arm\n");
-		}
-		Double probabilistic = stats.getStatistic(keywordProbabilistic);
-		if(probabilistic == null) {
-			probabilistic = 1.000000000000000000f;
-		}
-
-		index = getProbIntervention(index,score,probabilistic);//The probabilistic choosing method
-
-		if (index == -1) {
-			logger.error("Probabilistic method returned -1, no intervention chosen\n");
-		} else {
-
-			if (index != old) {
-				logger.debug("The probabilistic method did not choose the optimal arm p=" + this.stats.getStatistic(keywordProbabilistic) + "\n");
-				logger.debug("Instead of choosing arm " + arms.get(old).getName() + " it chose " + arms.get(index).getName() + "\n");
-			}
-		}
-
-		return index;
-*/
 	}
 
 	@Override

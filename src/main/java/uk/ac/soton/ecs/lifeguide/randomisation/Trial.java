@@ -51,7 +51,7 @@ public class Trial {
 	/* constructor */
     
     public Trial() {}
-
+/*
 	public Trial(	String name, String strategy,                                                                                                                     
 					Map<String, Double> parameters, List<Attribute> attributes,                                                                                                           
 					List<Arm> arms, int[] clusterFactors) {                                                                                               
@@ -69,6 +69,7 @@ public class Trial {
 		// mrt - cluster factors do nothing - so who cares?
 		//this.clusterFactors = clusterFactors;
 	}
+	*/
 
 	/* functions, son */
 
