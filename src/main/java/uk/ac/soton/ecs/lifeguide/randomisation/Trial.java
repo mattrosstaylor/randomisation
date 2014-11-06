@@ -176,8 +176,16 @@ public class Trial {
 		return output;
 	}
 
-	public Arm allocate(Participant participant, DataManager database) throws InvalidTrialException, PersistenceException {
-		return Strategy.create(strategy).allocate(this, participant, database);
+	public Arm allocate(Participant participant, DataManager database) throws InvalidTrialException, uk.ac.soton.ecs.lifeguide.randomisation.exception.PersistenceException {
+		return Strategy.create(this, database).allocate(participant);
+	}
+
+	public int getTotalWeight() {
+		int weight = 0;
+		for (Arm a: arms) {
+			weight += a.getWeight();
+		}
+		return weight;
 	}
 
 	/* getters and setters */

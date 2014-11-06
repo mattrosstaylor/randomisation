@@ -15,24 +15,31 @@ public abstract class Strategy {
 
 	private static final String STRATEGY_CLASS_PACKAGE = "uk.ac.soton.ecs.lifeguide.randomisation.";
 
-	public static Strategy create(String strategyName) throws InvalidTrialException {
+	public static Strategy create(Trial trial, DataManager database) throws InvalidTrialException {
 		try {
 			// Attempt to load the named class. Use casting/not-found exceptions to detect failure.
-			String className = STRATEGY_CLASS_PACKAGE + strategyName;
-			Class<? extends Strategy> strategyClass = Class.forName(className).asSubclass(Strategy.class);
+			String className = STRATEGY_CLASS_PACKAGE + trial.getStrategy();
 
-			// Do not allow the Strategy class itself.
-			if (strategyClass.equals(Strategy.class)) {
-				throw new ClassNotFoundException();
-			}
-			return strategyClass.newInstance();
+			return Class.forName(className).asSubclass(Strategy.class).getConstructor(Trial.class, DataManager.class).newInstance(trial, database);
 		}
 		catch (Exception e) {
-			throw new InvalidTrialException("Allocation method not found: " + strategyName + ".");
+			throw new InvalidTrialException("Allocation method not found: " + trial.getStrategy() + ".");
 		}
 	}
 
-	protected abstract Arm allocate(Trial trial, Participant participant, DataManager database) throws PersistenceException;
+	protected final Trial trial;
+	protected final DataManager database;
+	protected final Map<String, Double> statistics;
+	protected final Map<String, Double> parameters;
+
+	public Strategy(Trial trial, DataManager database){
+		this.trial = trial;
+		this.database = database;
+		this.statistics = trial.getStatistics();
+		this.parameters = trial.getParameters();
+	}
+
+	protected abstract Arm allocate(Participant participant) throws PersistenceException;
 
 	protected abstract Map<String, Double> getInitialisedStats(Trial trial);
 

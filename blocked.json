@@ -7,7 +7,7 @@
 		{ "name":"one", "weight":2 },
 		{ "name":"two", "weight":2 },
 		{ "name":"three", "weight":3 },
-		{ "name":"subcontrol", "weight":2 },
+		{ "name":"subcontrol", "weight":1 },
 	],
 	"attributes":[{
 		"name":"height",

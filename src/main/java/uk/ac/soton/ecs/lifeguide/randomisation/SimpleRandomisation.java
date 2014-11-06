@@ -6,37 +6,21 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class SimpleRandomisation extends Strategy {
+public class SimpleRandomisation extends Randomisation {
 
 	private static final Logger logger = LoggerFactory.getLogger(SimpleRandomisation.class);
 
-	@Override
-	protected Arm allocate(Trial trial, Participant participant, DataManager database) throws PersistenceException {
-		Map<String, Double> strategyStatistics = trial.getStatistics();
-		String stratifiedEnum = trial.getStrata(participant);
+	public SimpleRandomisation(Trial trial, DataManager database) {
+		super(trial, database);
+	}
 
-		Map<Arm, Integer> allocations = new HashMap<Arm, Integer>();
+	protected Arm allocateHelper(String stratifiedEnum, List<Arm> openArms, Map<Arm, Integer> allocations) {
 		int openArmsWeightSum = 0;
-		List<Arm> openArms = new ArrayList<Arm>();
-	
-		for (Arm a : trial.getArms()) {
-			String enumString = getAllocationStatisticName(a.getName(), stratifiedEnum);
-			Double strategyStatistic = strategyStatistics.get(enumString);
-			int roundedVal = (int)(Math.round(strategyStatistic));
-			
-			if (roundedVal < a.getMaxParticipants()) {
-				openArmsWeightSum += a.getWeight();
-				openArms.add(a);
-				allocations.put(a, roundedVal);
-			}
+		for (Arm openArm: openArms) {
+			openArmsWeightSum += openArm.getWeight();
 		}
 
-		if (openArms.isEmpty()) {
-			logger.debug("Trial full.");
-			return trial.getDefaultArm();
-		}
-
-		int roll = new Random().nextInt(openArmsWeightSum);
+		int roll = random.nextInt(openArmsWeightSum);
 		Arm arm = null;
 		Iterator<Arm> armIter = openArms.iterator();
 
@@ -44,9 +28,6 @@ public class SimpleRandomisation extends Strategy {
 			arm = armIter.next();
 			roll -= arm.getWeight();
 		} while (roll >= 0);
-
-		strategyStatistics.put(getAllocationStatisticName(arm.getName(), stratifiedEnum), Double.valueOf(allocations.get(arm) + 1));
-		database.update(trial, participant, arm);
 
 		return arm;
 	}

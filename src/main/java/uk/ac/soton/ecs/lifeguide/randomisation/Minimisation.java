@@ -13,8 +13,12 @@ public class Minimisation extends Strategy {
 
 	private Random rand = new Random();
 
+	public Minimisation(Trial trial, DataManager database) {
+		super(trial, database);
+	}
+
 	@Override
-	protected Arm allocate(Trial trial, Participant participant, DataManager database) throws PersistenceException {
+	protected Arm allocate(Participant participant) throws PersistenceException {
 
 		List<Arm> arms = trial.getArms();
 		Map<Arm, Double> scores = new HashMap<Arm, Double>();
