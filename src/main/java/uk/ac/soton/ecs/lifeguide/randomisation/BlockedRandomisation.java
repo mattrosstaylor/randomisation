@@ -14,9 +14,7 @@ public class BlockedRandomisation extends Strategy {
 	Random random = new Random();
 
 	@Override
-	protected Arm allocate(Trial trial,
-										 Participant participant,
-										 DataManager database) throws PersistenceException {
+	protected Arm allocate(Trial trial, Participant participant, DataManager database) throws PersistenceException {
 		Map<String, Double> strategyStatistics = trial.getStatistics();
 		Map<String, Double> trialParameters = trial.getParameters();
 		String stratifiedEnum = trial.getStrata(participant);
@@ -37,7 +35,6 @@ public class BlockedRandomisation extends Strategy {
 			sum += a.getWeight();
 		}
 
-		//Trial full
 		if (activeSum == 0) {
 			logger.debug("Trial full.");
 			return trial.getDefaultArm();
@@ -97,8 +94,6 @@ public class BlockedRandomisation extends Strategy {
 				arm = block.get(counter);
 				counter++;
 
-				// mrt - ignore this for now - we need to change allocations to a Map<Arm, Integer>
-				//If selected treatment have not reached limit finish
 				if (allocations.get(arm) >= arm.getMaxParticipants()) {
 					arm = null;
 				}
@@ -110,6 +105,15 @@ public class BlockedRandomisation extends Strategy {
 
 		database.update(trial, participant, arm);
 		return arm;
+	}
+
+	private String getStatisticName(String statName, String strataName) {
+		String result = statName;
+		
+		if (!strataName.equals("")) {
+			result = "(" +strataName +") " +result;
+		} 
+		return result;
 	}
 
 	@Override
@@ -124,15 +128,6 @@ public class BlockedRandomisation extends Strategy {
 			}
 		}
 		return stats;
-	}
-
-	private String getStatisticName(String statName, String strataName) {
-		String result = statName;
-		
-		if (!strataName.equals("")) {
-			result = "(" +strataName +") " +result;
-		} 
-		return result;
 	}
 
 }

@@ -17,7 +17,6 @@ public class Minimisation extends Strategy {
 	protected Arm allocate(Trial trial, Participant participant, DataManager database) throws PersistenceException {
 
 		List<Arm> arms = trial.getArms();
-
 		Map<Arm, Double> scores = new HashMap<Arm, Double>();
 
 		for (Arm arm: arms) {
@@ -100,7 +99,7 @@ public class Minimisation extends Strategy {
 	private String getStratStatString(Arm arm, Attribute attr, String value) {
 		return "(" +attr.getName() +" " +attr.getGroupingNameForValue(value) +") " +arm.getName();
 	}
-	
+
 
 	@Override
 	protected Map<String, Double> getInitialisedStats(Trial trial) {
