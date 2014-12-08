@@ -28,17 +28,17 @@ public class Minimisation extends Strategy {
 
 				scores.put(arm, 0.0);
 
-				for (Attribute attr: trial.getAttributes()) {
+				for (Variable v: trial.getVariables()) {
 
 					String get_string = getStratStatString(
 						arm,
-						attr, 
-						participant.getResponse(attr.getName())
+						v, 
+						participant.getResponse(v.getName())
 					);
 					Double stat = trial.getStatistics().get(get_string);
 
 					if (stat != null) {
-						scores.put(arm, scores.get(arm) + stat*attr.getWeight());
+						scores.put(arm, scores.get(arm) + stat*v.getWeight());
 					}
 				}
 				scores.put(arm, scores.get(arm)/arm.getWeight());
@@ -80,11 +80,11 @@ public class Minimisation extends Strategy {
 		Arm arm = optionArms.get(new Random().nextInt(optionArms.size()));
 
 
-		for (Attribute attr: trial.getAttributes()) {
+		for (Variable v: trial.getVariables()) {
 			String put_string = getStratStatString(
 				arm,
-				attr,
-				participant.getResponse(attr.getName()));
+				v,
+				participant.getResponse(v.getName()));
 
 			trial.getStatistics().put(put_string, trial.getStatistics().get(put_string) + 1.0);
 		}
@@ -100,8 +100,8 @@ public class Minimisation extends Strategy {
 	}
 
 
-	private String getStratStatString(Arm arm, Attribute attr, String value) {
-		return "(" +attr.getName() +" " +attr.getStratumNameForValue(value) +") " +arm.getName();
+	private String getStratStatString(Arm arm, Variable variable, String value) {
+		return "(" +variable.getName() +" " +variable.getStratumNameForValue(value) +") " +arm.getName();
 	}
 
 
@@ -110,9 +110,9 @@ public class Minimisation extends Strategy {
 		Map<String, Double> stats = new HashMap<String, Double>();
 		for (Arm arm : trial.getArms()) {
 			stats.put(getAllocationStatisticName(arm.getName(), ""), 0.0);
-			for (Attribute attribute : trial.getAttributes()) {
-				for (Stratum s : attribute.getStrata()) {
-					String put_string = getStratStatString(arm, attribute, s.getValidValue());
+			for (Variable variable : trial.getVariables()) {
+				for (Stratum s : variable.getStrata()) {
+					String put_string = getStratStatString(arm, variable, s.getValidValue());
 					stats.put(put_string, 0.0);
 				}
 			}

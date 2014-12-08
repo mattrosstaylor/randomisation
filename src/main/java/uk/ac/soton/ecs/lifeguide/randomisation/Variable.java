@@ -4,8 +4,8 @@ import java.util.*;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "attributes")
-public class Attribute {
+@Table(name = "variables")
+public class Variable {
 
 	@Id @GeneratedValue
 	@Column(name="id")
@@ -21,26 +21,26 @@ public class Attribute {
 	@Column(name="weight")
 	private double weight;
 
-	@OneToMany(mappedBy="attribute", cascade = {CascadeType.ALL})
+	@OneToMany(mappedBy="variable", cascade = {CascadeType.ALL})
 	private List<Stratum> strata = new ArrayList<Stratum>();
 
-	@Column(name="attribute_order")
-	int attributeOrder;
+	@Column(name="variable_order")
+	int variableOrder;
 
 	/* constructors */
 
-	public Attribute() {
+	public Variable() {
 		strata = new ArrayList<Stratum>();
 	}
 
-	public Attribute(String name, List<Stratum> strata, double weight) {
+	public Variable(String name, List<Stratum> strata, double weight) {
 		this.name = name;
 		this.strata = strata;
 		this.weight = weight;
 
 		// mrt - add the back references to the attribute from the grouping
 		for (Stratum s: strata) {
-			s.setAttribute(this);
+			s.setVariable(this);
 		}
 	}
 
@@ -80,6 +80,6 @@ public class Attribute {
 	public List<Stratum> getStrata() { return strata; }
 	public void setStrata(List<Stratum> strata) { this.strata = strata; }
 
-	public int getAttributeOrder() { return attributeOrder; }
-	public void setAttributeOrder(int attributeOrder) { this.attributeOrder = attributeOrder; }
+	public int getVariableOrder() { return variableOrder; }
+	public void setVariableOrder(int variableOrder) { this.variableOrder = variableOrder; }
 }

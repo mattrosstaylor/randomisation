@@ -29,7 +29,7 @@ public class DataManager {
 				addAnnotatedClass(Trial.class).
 				addAnnotatedClass(Participant.class).
 				addAnnotatedClass(Arm.class).
-				addAnnotatedClass(Attribute.class).
+				addAnnotatedClass(Variable.class).
 				addAnnotatedClass(Stratum.class).
 				addAnnotatedClass(RangeStratum.class).
 				buildSessionFactory();

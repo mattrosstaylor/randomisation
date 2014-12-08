@@ -30,8 +30,8 @@ public class Trial {
 	private List<Arm> arms = new ArrayList<Arm>();
 
 	@OneToMany(mappedBy="trial", cascade = {CascadeType.ALL})
-	@OrderBy("attributeOrder")
-	private List<Attribute> attributes = new ArrayList<Attribute>();
+	@OrderBy("variableOrder")
+	private List<Variable> variables = new ArrayList<Variable>();
 
 	@OneToMany(mappedBy="trial", cascade = {CascadeType.ALL})
 	private List<Participant> participants = new ArrayList<Participant>();
@@ -60,10 +60,10 @@ public class Trial {
 		arm.setTrial(this);
 	}
 
-	public void addAttribute(Attribute attribute) {
-		attributes.add(attribute);
-		attribute.setAttributeOrder(attributes.indexOf(attribute));
-		attribute.setTrial(this);
+	public void addVariable(Variable variable) {
+		variables.add(variable);
+		variable.setVariableOrder(variables.indexOf(variable));
+		variable.setTrial(this);
 	}
 
 	public void addParticipant(Participant p) {
@@ -87,18 +87,18 @@ public class Trial {
 		String result = "";
 		
 		boolean notFirst = false;
-		for (Attribute attribute : attributes) {
+		for (Variable variable : variables) {
 			if (notFirst) {
 				result += ", ";
 			}
 			else{
 				notFirst = true;
 			}
-			result += attribute.getName();
+			result += variable.getName();
 
-			String response = participant.getResponse(attribute.getName());
+			String response = participant.getResponse(variable.getName());
 
-			result += " "+attribute.getStratumNameForValue(response);
+			result += " "+variable.getStratumNameForValue(response);
 		}
 		return result;
 	}
@@ -108,7 +108,7 @@ public class Trial {
 		result.add("");
 
 		boolean notFirst = false;
-		for (Attribute attribute : attributes) {
+		for (Variable variable : variables) {
 			
 			List<String> newResult = new ArrayList<String>();
 
@@ -119,9 +119,9 @@ public class Trial {
 				else{
 					notFirst = true;
 				}
-				strata += attribute.getName();
+				strata += variable.getName();
 
-				for (String stratumName : attribute.getAllStratumNames()){
+				for (String stratumName : variable.getAllStratumNames()){
 					newResult.add(strata + " "+stratumName);
 				}
 			}
@@ -160,13 +160,13 @@ public class Trial {
 			}
 		}
 
-		output += "\nAttributes: ";
-		if (attributes.size() == 0) {
+		output += "\nVariables: ";
+		if (variables.size() == 0) {
 			output +="\nNone";
 		}
 		else {
-			for (Attribute attr : attributes) {
-				output += "\n" + attr;
+			for (Variable v : variables) {
+				output += "\n" + v;
 			}
 		}
 
@@ -205,8 +205,8 @@ public class Trial {
 	public List<Arm> getArms() { return arms; }
 	public void setArms(List<Arm> arms) { this.arms = arms; }
 
-	public List<Attribute> getAttributes() { return attributes; }
-	public void setAttributes(List<Attribute> attributes) { this.attributes = attributes; }
+	public List<Variable> getVariables() { return variables; }
+	public void setVariables(List<Variable> variables) { this.variables = variables; }
 
 	public List<Participant> getParticipants() { return participants; }
 	public void setParticipants(List<Participant> participants) { this.participants = participants; }

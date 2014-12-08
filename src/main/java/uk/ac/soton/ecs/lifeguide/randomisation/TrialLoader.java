@@ -56,12 +56,12 @@ public class TrialLoader{
 				catch (JSONException e) {}
 			} 
 			else if (key.equals("attributes")) {
-				JSONArray attributesData = json.getJSONArray("attributes");
-				for (int i=0; i<attributesData.length(); i++) {
-					JSONObject attributeData = attributesData.getJSONObject(i);
+				JSONArray variablesData = json.getJSONArray("attributes");
+				for (int i=0; i<variablesData.length(); i++) {
+					JSONObject variableData = variablesData.getJSONObject(i);
 
 					List<Stratum> strata = new ArrayList<Stratum>();
-					JSONArray strataData = attributeData.getJSONArray("groupings");
+					JSONArray strataData = variableData.getJSONArray("groupings");
 					for (int j=0; j<strataData.length(); j++) {
 						JSONObject stratumData = strataData.getJSONObject(j);
 						double min = RangeStratum.DEFAULT_MIN;
@@ -85,11 +85,11 @@ public class TrialLoader{
 					double priority = 1.0;
 
 					try {
-						priority = attributeData.getDouble("priority");
+						priority = variableData.getDouble("priority");
 					}
 					catch (JSONException e) {}
 
-					t.addAttribute(new Attribute(attributeData.getString("name"),strata,priority));
+					t.addVariable(new Variable(variableData.getString("name"),strata,priority));
 				}
 			} 
 			else if (key.equals("default_arm")) {

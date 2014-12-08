@@ -14,8 +14,8 @@ public class Stratum {
 	private int id;
 
 	@ManyToOne
-	@JoinColumn(name="attribute_id")
-	private Attribute attribute;
+	@JoinColumn(name="variable_id")
+	private Variable variable;
 
 	@Column(name="name")
 	private String name;
@@ -32,8 +32,8 @@ public class Stratum {
 	public int getId() { return id;}
 	public void setId(int id) { this.id = id; }
 
-	public Attribute getAttribute() { return attribute; }
-	public void setAttribute(Attribute attribute) { this.attribute = attribute; }
+	public Variable getVariable() { return variable; }
+	public void setVariable(Variable variable) { this.variable = variable; }
 
 	public String getName() { return name; }
 	public void setName(String name) { this.name = name; }
