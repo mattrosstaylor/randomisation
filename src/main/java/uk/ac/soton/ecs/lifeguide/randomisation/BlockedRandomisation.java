@@ -63,8 +63,6 @@ public class BlockedRandomisation extends Randomisation {
 		return arm;
 	}
 
-
-
 	private String getStatisticName(String statName, String strataName) {
 		String result = statName;
 		

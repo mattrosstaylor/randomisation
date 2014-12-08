@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 @Entity
 @DiscriminatorValue("continuous")
-public class RangeGrouping extends Grouping {
+public class RangeStratum extends Stratum {
 
 	@Column(name="minimum")
 	private double minimum;
@@ -17,7 +17,7 @@ public class RangeGrouping extends Grouping {
 	
 	/* constructors */
 
-	public RangeGrouping() {
+	public RangeStratum() {
 	}
 
 	private static String generateName(double minimum, double maximum){
@@ -39,8 +39,8 @@ public class RangeGrouping extends Grouping {
 		return "any";
 	}
 
-	public RangeGrouping(double minimum, double maximum) {
-		super(RangeGrouping.generateName(minimum, maximum));
+	public RangeStratum(double minimum, double maximum) {
+		super(RangeStratum.generateName(minimum, maximum));
 		this.minimum = minimum;
 		this.maximum = maximum;
 	}
@@ -55,7 +55,7 @@ public class RangeGrouping extends Grouping {
 
 	/* methods */
 
-	public boolean inGrouping(String s){
+	public boolean inStratum(String s){
 		try {
 			double val = Double.parseDouble(s);
 			return val < this.maximum && val >= this.minimum;

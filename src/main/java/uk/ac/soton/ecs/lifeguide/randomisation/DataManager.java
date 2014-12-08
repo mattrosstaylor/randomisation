@@ -30,8 +30,8 @@ public class DataManager {
 				addAnnotatedClass(Participant.class).
 				addAnnotatedClass(Arm.class).
 				addAnnotatedClass(Attribute.class).
-				addAnnotatedClass(Grouping.class).
-				addAnnotatedClass(RangeGrouping.class).
+				addAnnotatedClass(Stratum.class).
+				addAnnotatedClass(RangeStratum.class).
 				buildSessionFactory();
 		}
 		catch (Exception e) { 

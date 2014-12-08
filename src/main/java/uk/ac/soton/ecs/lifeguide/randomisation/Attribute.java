@@ -22,7 +22,7 @@ public class Attribute {
 	private double weight;
 
 	@OneToMany(mappedBy="attribute", cascade = {CascadeType.ALL})
-	private List<Grouping> groupings = new ArrayList<Grouping>();
+	private List<Stratum> strata = new ArrayList<Stratum>();
 
 	@Column(name="attribute_order")
 	int attributeOrder;
@@ -30,34 +30,34 @@ public class Attribute {
 	/* constructors */
 
 	public Attribute() {
-		groupings = new ArrayList<Grouping>();
+		strata = new ArrayList<Stratum>();
 	}
 
-	public Attribute(String name, List<Grouping> groupings, double weight) {
+	public Attribute(String name, List<Stratum> strata, double weight) {
 		this.name = name;
-		this.groupings = groupings;
+		this.strata = strata;
 		this.weight = weight;
 
 		// mrt - add the back references to the attribute from the grouping
-		for (Grouping g: groupings) {
-			g.setAttribute(this);
+		for (Stratum s: strata) {
+			s.setAttribute(this);
 		}
 	}
 
-	public String getGroupingNameForValue(String value) {
-		for (Grouping g : groupings) {
-			if (g.inGrouping(value)) {
-				return g.getName();
+	public String getStratumNameForValue(String value) {
+		for (Stratum s : strata) {
+			if (s.inStratum(value)) {
+				return s.getName();
 			}
 		}
 		return null;
 	}
 
-	public List<String> getAllGroupingNames() {
+	public List<String> getAllStratumNames() {
 		List<String> result = new ArrayList<String>();
 
-		for (Grouping g : groupings) {
-			result.add(g.getName());
+		for (Stratum s : strata) {
+			result.add(s.getName());
 		}
 
 		return result;
@@ -77,8 +77,8 @@ public class Attribute {
 	public double getWeight() { return weight; }
 	public void setWeight(double weight) { this.weight = weight; }
 
-	public List<Grouping> getGroupings() { return groupings; }
-	public void setRanges(List<Grouping> groupings) { this.groupings = groupings; }
+	public List<Stratum> getStrata() { return strata; }
+	public void setStrata(List<Stratum> strata) { this.strata = strata; }
 
 	public int getAttributeOrder() { return attributeOrder; }
 	public void setAttributeOrder(int attributeOrder) { this.attributeOrder = attributeOrder; }

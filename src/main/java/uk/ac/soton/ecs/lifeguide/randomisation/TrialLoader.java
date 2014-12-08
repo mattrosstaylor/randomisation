@@ -60,25 +60,25 @@ public class TrialLoader{
 				for (int i=0; i<attributesData.length(); i++) {
 					JSONObject attributeData = attributesData.getJSONObject(i);
 
-					List<Grouping> groupings = new ArrayList<Grouping>();
-					JSONArray groupingsData = attributeData.getJSONArray("groupings");
-					for (int j=0; j<groupingsData.length(); j++) {
-						JSONObject groupingData = groupingsData.getJSONObject(j);
-						double min = RangeGrouping.DEFAULT_MIN;
-						double max = RangeGrouping.DEFAULT_MAX;
+					List<Stratum> strata = new ArrayList<Stratum>();
+					JSONArray strataData = attributeData.getJSONArray("groupings");
+					for (int j=0; j<strataData.length(); j++) {
+						JSONObject stratumData = strataData.getJSONObject(j);
+						double min = RangeStratum.DEFAULT_MIN;
+						double max = RangeStratum.DEFAULT_MAX;
 						try {
-							min = groupingData.getDouble("min");
+							min = stratumData.getDouble("min");
 						}
 						catch (JSONException e) {}
 						try {
-							max = groupingData.getDouble("max");
+							max = stratumData.getDouble("max");
 						}
 						catch (JSONException e) {}
 						try {
-							groupings.add(new Grouping(groupingData.getString("value")));
+							strata.add(new Stratum(stratumData.getString("value")));
 						}
 						catch (JSONException e) {
-							groupings.add(new RangeGrouping(min, max));
+							strata.add(new RangeStratum(min, max));
 						}
 					}
 
@@ -89,7 +89,7 @@ public class TrialLoader{
 					}
 					catch (JSONException e) {}
 
-					t.addAttribute(new Attribute(attributeData.getString("name"),groupings,priority));
+					t.addAttribute(new Attribute(attributeData.getString("name"),strata,priority));
 				}
 			} 
 			else if (key.equals("default_arm")) {

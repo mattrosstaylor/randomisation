@@ -98,7 +98,7 @@ public class Trial {
 
 			String response = participant.getResponse(attribute.getName());
 
-			result += " "+attribute.getGroupingNameForValue(response);
+			result += " "+attribute.getStratumNameForValue(response);
 		}
 		return result;
 	}
@@ -121,8 +121,8 @@ public class Trial {
 				}
 				strata += attribute.getName();
 
-				for (String groupingName : attribute.getAllGroupingNames()){
-					newResult.add(strata + " "+groupingName);
+				for (String stratumName : attribute.getAllStratumNames()){
+					newResult.add(strata + " "+stratumName);
 				}
 			}
 

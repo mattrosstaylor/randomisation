@@ -3,11 +3,11 @@ package uk.ac.soton.ecs.lifeguide.randomisation;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "groupings")
+@Table(name = "strata")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="type", discriminatorType=DiscriminatorType.STRING)
 @DiscriminatorValue("discrete")
-public class Grouping {
+public class Stratum {
 
 	@Id @GeneratedValue
 	@Column(name="id")
@@ -20,10 +20,10 @@ public class Grouping {
 	@Column(name="name")
 	private String name;
 
-	public Grouping() {
+	public Stratum() {
 	}
 
-	public Grouping(String name) {
+	public Stratum(String name) {
 		this.name = name;
 	}
 
@@ -40,7 +40,7 @@ public class Grouping {
 
 	/* methods */
 
-	public boolean inGrouping(String s){
+	public boolean inStratum(String s){
 		return name.equals(s);
 	}
 

@@ -101,7 +101,7 @@ public class Minimisation extends Strategy {
 
 
 	private String getStratStatString(Arm arm, Attribute attr, String value) {
-		return "(" +attr.getName() +" " +attr.getGroupingNameForValue(value) +") " +arm.getName();
+		return "(" +attr.getName() +" " +attr.getStratumNameForValue(value) +") " +arm.getName();
 	}
 
 
@@ -111,8 +111,8 @@ public class Minimisation extends Strategy {
 		for (Arm arm : trial.getArms()) {
 			stats.put(getAllocationStatisticName(arm.getName(), ""), 0.0);
 			for (Attribute attribute : trial.getAttributes()) {
-				for (Grouping g : attribute.getGroupings()) {
-					String put_string = getStratStatString(arm, attribute, g.getValidValue());
+				for (Stratum s : attribute.getStrata()) {
+					String put_string = getStratStatString(arm, attribute, s.getValidValue());
 					stats.put(put_string, 0.0);
 				}
 			}
