@@ -9,14 +9,14 @@
 		{ "name":"three", "weight":3 },
 		{ "name":"subcontrol", "weight":1 },
 	],
-	"attributes":[{
+	"stratification_variables":[{
 		"name":"height",
-		"groupings":[
+		"strata":[
 			{ "max":100 },
 			{ "min":100 }
 		]},{
 		"name":"weight",
-		"groupings":[
+		"strata":[
 			{ "max":50 },
 			{ "min":50, "max":100 },
 			{ "min":100 }

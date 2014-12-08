@@ -55,13 +55,13 @@ public class TrialLoader{
 				}
 				catch (JSONException e) {}
 			} 
-			else if (key.equals("attributes")) {
-				JSONArray variablesData = json.getJSONArray("attributes");
+			else if (key.equals("stratification_variables")) {
+				JSONArray variablesData = json.getJSONArray("stratification_variables");
 				for (int i=0; i<variablesData.length(); i++) {
 					JSONObject variableData = variablesData.getJSONObject(i);
 
 					List<Stratum> strata = new ArrayList<Stratum>();
-					JSONArray strataData = variableData.getJSONArray("groupings");
+					JSONArray strataData = variableData.getJSONArray("strata");
 					for (int j=0; j<strataData.length(); j++) {
 						JSONObject stratumData = strataData.getJSONObject(j);
 						double min = RangeStratum.DEFAULT_MIN;

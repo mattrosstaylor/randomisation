@@ -6,10 +6,10 @@
 		{ "name": "one", "weight": 2 },
 		{ "name": "two", "weight": 2 }
 	],
-	"attributes":[
+	"stratification_variables":[
 			{
 				"name":"weight",
-				"groupings":[
+				"strata":[
 					{ "max":50 },
 					{ "min":50, "max":100 },
 					{ "min":100 }
@@ -18,7 +18,7 @@
 			{
 				"name":"isAlpaca",
 				"priority": 2,
-				"groupings":[
+				"strata":[
 					{ "value": "yes" },
 					{ "value": "no" }
 				]
