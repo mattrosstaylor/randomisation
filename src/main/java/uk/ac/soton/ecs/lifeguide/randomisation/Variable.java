@@ -38,7 +38,7 @@ public class Variable {
 		this.strata = strata;
 		this.weight = weight;
 
-		// mrt - add the back references to the attribute from the grouping
+		// mrt - add the back references to the variable from the grouping
 		for (Stratum s: strata) {
 			s.setVariable(this);
 		}

@@ -28,17 +28,17 @@ public class Minimisation extends Strategy {
 
 				scores.put(arm, 0.0);
 
-				for (Variable v: trial.getVariables()) {
+				for (Variable variable: trial.getVariables()) {
 
 					String get_string = getStratStatString(
 						arm,
-						v, 
-						participant.getResponse(v.getName())
+						variable, 
+						participant.getResponse(variable.getName())
 					);
 					Double stat = trial.getStatistics().get(get_string);
 
 					if (stat != null) {
-						scores.put(arm, scores.get(arm) + stat*v.getWeight());
+						scores.put(arm, scores.get(arm) + stat*variable.getWeight());
 					}
 				}
 				scores.put(arm, scores.get(arm)/arm.getWeight());
@@ -80,11 +80,11 @@ public class Minimisation extends Strategy {
 		Arm arm = optionArms.get(new Random().nextInt(optionArms.size()));
 
 
-		for (Variable v: trial.getVariables()) {
+		for (Variable variable: trial.getVariables()) {
 			String put_string = getStratStatString(
 				arm,
-				v,
-				participant.getResponse(v.getName()));
+				variable,
+				participant.getResponse(variable.getName()));
 
 			trial.getStatistics().put(put_string, trial.getStatistics().get(put_string) + 1.0);
 		}
