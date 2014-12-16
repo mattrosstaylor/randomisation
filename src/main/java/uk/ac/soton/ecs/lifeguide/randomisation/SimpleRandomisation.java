@@ -14,7 +14,7 @@ public class SimpleRandomisation extends Randomisation {
 		super(trial, database);
 	}
 
-	protected Arm allocateHelper(String stratifiedEnum, List<Arm> openArms, Map<Arm, Integer> allocations) {
+	protected Arm allocateHelper(Participant participant, String stratifiedEnum, List<Arm> openArms, Map<Arm, Integer> allocations) {
 		int openArmsWeightSum = 0;
 		for (Arm openArm: openArms) {
 			openArmsWeightSum += openArm.getWeight();

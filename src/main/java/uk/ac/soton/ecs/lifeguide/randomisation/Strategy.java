@@ -42,7 +42,7 @@ public abstract class Strategy {
 	protected void initialiseParameters(Trial trial) {
 	};
 
-	protected String getAllocationStatisticName(String armName, String strataName) {
+	/*protected String getAllocationStatisticName(String armName, String strataName) {
 		String result = armName +" allocations";
 		
 		if (!strataName.equals("")) {
@@ -60,5 +60,31 @@ public abstract class Strategy {
 		else {
 			return 0.0;
 		}
+	}*/
+
+	protected String getStatisticString(String armName, String strataName, String statisticName) {
+		String result = "";
+		if (!strataName.equals("")) {
+			result += "("+strataName+") ";
+		}
+		if (!armName.equals("")) {
+			result += armName +" ";
+		}
+		return result+statisticName;
+	}
+
+	protected Double getStatistic(String armName, String strataName, String statisticName) {
+		String name = getStatisticString(armName,strataName,statisticName);
+		if (parameters.containsKey(name)) {
+			return parameters.get(name);	
+		}
+		else {
+			return 0.0;
+		}	
+	}
+
+	protected void setStatistic(String armName, String strataName, String statisticName, Double value) {
+		String name = getStatisticString(armName,strataName,statisticName);
+		parameters.put(name, value);
 	}
 }

@@ -6,22 +6,30 @@
 		{ "name": "one", "weight": 2 },
 		{ "name": "two", "weight": 2 }
 	],
-	"stratification_variables":[
-			{
-				"name":"weight",
-				"strata":[
-					{ "max":50 },
-					{ "min":50, "max":100 },
-					{ "min":100 }
-				]
-			},
-			{
-				"name":"isAlpaca",
-				"priority": 2,
-				"strata":[
-					{ "value": "yes" },
-					{ "value": "no" }
-				]
-			}
+	"variables":[{
+			"name":"weight",
+			"type":"minimisation",
+			"strata":[
+				{ "max":50 },
+				{ "min":50, "max":100 },
+				{ "min":100 }
+			]
+		},
+		{
+			"name":"height",
+			"type":"minimisation",
+			"strata":[
+				{ "max":100 },
+				{ "min":100 }
+			]
+		},
+		{
+			"name":"isAlpaca",
+			"type":"stratification",
+			"strata":[
+				{ "value": "yes" },
+				{ "value": "no" }
+			]
+		}
 	]
 }

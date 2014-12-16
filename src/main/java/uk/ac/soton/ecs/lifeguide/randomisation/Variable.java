@@ -18,6 +18,9 @@ public class Variable {
 	@Column(name="name")
 	private String name;
 
+	@Column(name="type")
+	private String type;
+
 	@Column(name="weight")
 	private double weight;
 
@@ -33,8 +36,9 @@ public class Variable {
 		strata = new ArrayList<Stratum>();
 	}
 
-	public Variable(String name, List<Stratum> strata, double weight) {
+	public Variable(String name, String type, List<Stratum> strata, double weight) {
 		this.name = name;
+		this.type = type;
 		this.strata = strata;
 		this.weight = weight;
 
@@ -73,6 +77,9 @@ public class Variable {
 
 	public String getName() { return name; }
 	public void setName(String name) { this.name = name; }
+
+	public String getType() { return type; }
+	public void setType(String type) { this.type = type; }
 
 	public double getWeight() { return weight; }
 	public void setWeight(double weight) { this.weight = weight; }

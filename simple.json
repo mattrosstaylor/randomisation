@@ -7,7 +7,7 @@
 	],
 	"default_arm": "study2",
 
-	"stratification_variables":[{
+	"variables":[{
 		"name":"weight",
 		"strata":[
 			{ "max":50 },

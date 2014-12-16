@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.util.*;
 
-public class Minimisation extends Strategy {
+public class Minimisation extends Randomisation {
 
 	private static final Logger logger = LoggerFactory.getLogger(Minimisation.class);
 
@@ -18,31 +18,30 @@ public class Minimisation extends Strategy {
 	}
 
 	@Override
-	protected Arm allocate(Participant participant) throws PersistenceException {
+	protected Arm allocateHelper(Participant participant, String stratifiedEnum, List<Arm> openArms, Map<Arm, Integer> allocations) {
 
 		List<Arm> arms = trial.getArms();
 		Map<Arm, Double> scores = new HashMap<Arm, Double>();
 
-		for (Arm arm: arms) {
-			if (trial.getParameters().get(getAllocationStatisticName(arm.getName(), "")) < arm.getMaxParticipants()) {
+		for (Arm arm: openArms) {
+			scores.put(arm, 0.0);
 
-				scores.put(arm, 0.0);
+			for (Variable variable: trial.getVariablesByType("minimisation")) {
 
-				for (Variable variable: trial.getVariables()) {
+				/*String get_string = getStratStatString(
+					arm,
+					variable, 
+					participant.getResponse(variable.getName())
+				);
+				Double stat = parameters.get(get_string);
+				*/
+				Double stat = getMinimisationStatistic(stratifiedEnum, arm, variable,participant.getResponse(variable.getName()));
 
-					String get_string = getStratStatString(
-						arm,
-						variable, 
-						participant.getResponse(variable.getName())
-					);
-					Double stat = trial.getParameters().get(get_string);
-
-					if (stat != null) {
-						scores.put(arm, scores.get(arm) + stat*variable.getWeight());
-					}
+				if (stat != null) {
+					scores.put(arm, scores.get(arm) + stat*variable.getWeight());
 				}
-				scores.put(arm, scores.get(arm)/arm.getWeight());
 			}
+			scores.put(arm, scores.get(arm)/arm.getWeight());
 		}
 
 		List<Arm> smallestArms = new ArrayList<Arm>();  //List that stores the index of those scores which have same value
@@ -61,7 +60,7 @@ public class Minimisation extends Strategy {
 		}
 
 		List<Arm> optionArms;
-		if (rand.nextDouble() > trial.getParameters().get("certainty")) {
+		if (rand.nextDouble() > parameters.get("certainty")) {
 			optionArms = new ArrayList<Arm>();
 			for (Arm a: scores.keySet()) {
 				if (!smallestArms.contains(a)){
@@ -79,41 +78,63 @@ public class Minimisation extends Strategy {
 		Arm arm = optionArms.get(new Random().nextInt(optionArms.size()));
 
 
-		for (Variable variable: trial.getVariables()) {
-			String put_string = getStratStatString(
+		for (Variable variable: trial.getVariablesByType("minimisation")) {
+			/*String put_string = getStratStatString(
 				arm,
 				variable,
 				participant.getResponse(variable.getName()));
 
-			trial.getParameters().put(put_string, trial.getParameters().get(put_string) + 1.0);
-		}
+			trial.getParameters().put(put_string, trial.getParameters().get(put_string) + 1.0);*/
 
-		trial.getParameters().put(
-			getAllocationStatisticName(arm.getName(),""),
-			trial.getParameters().get(getAllocationStatisticName(arm.getName(),"")) + 1.0
-		);
-		
-		database.update(trial, participant, arm);
+			incrementMinimisationStatistic(stratifiedEnum, arm, variable, participant.getResponse(variable.getName()));
+		}
 
 		return arm;
 	}
 
 
+	private String getMiniString(String strataName, Arm arm, Variable variable, String value) {
+		return getStatisticString(
+			"["+variable.getName() +" "+variable.getStratumNameForValue(value)+"]",
+			strataName,
+			arm.getName());
+	}
+
+	private void incrementMinimisationStatistic(String strataName, Arm arm, Variable variable, String value) {
+		String name = getMiniString(strataName,arm,variable,value);
+
+		Double currentValue = 0.0;
+		if (parameters.containsKey(name)) {
+			currentValue = parameters.get(name);	
+		}
+		parameters.put(name,currentValue+1.0);
+	}
+
+	private Double getMinimisationStatistic(String strataName, Arm arm, Variable variable, String value) {
+		String name = getMiniString(strataName,arm,variable,value);
+		if (parameters.containsKey(name)) {
+			return parameters.get(name);	
+		}
+		else {
+			return 0.0;
+		}
+	}
+/*
 	private String getStratStatString(Arm arm, Variable variable, String value) {
 		return "(" +variable.getName() +" " +variable.getStratumNameForValue(value) +") " +arm.getName();
 	}
-
+*/
 
 	@Override
 	protected void initialiseParameters(Trial trial) {
-		Map<String, Double> parameters = trial.getParameters();
+/*		Map<String, Double> parameters = trial.getParameters();
 		for (Arm arm : trial.getArms()) {
-			for (Variable variable : trial.getVariables()) {
+			for (Variable variable : trial.getVariablesByType("minimisation")) {
 				for (Stratum s : variable.getStrata()) {
 					String put_string = getStratStatString(arm, variable, s.getValidValue());
 					parameters.put(put_string, 0.0);
 				}
 			}
-		}
+		}*/
 	}
 }

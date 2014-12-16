@@ -55,8 +55,8 @@ public class TrialLoader{
 				}
 				catch (JSONException e) {}
 			} 
-			else if (key.equals("stratification_variables")) {
-				JSONArray variablesData = json.getJSONArray("stratification_variables");
+			else if (key.equals("variables")) {
+				JSONArray variablesData = json.getJSONArray("variables");
 				for (int i=0; i<variablesData.length(); i++) {
 					JSONObject variableData = variablesData.getJSONObject(i);
 
@@ -82,14 +82,20 @@ public class TrialLoader{
 						}
 					}
 
-					double priority = 1.0;
-
+					String type = null;
 					try {
-						priority = variableData.getDouble("priority");
+						type = variableData.getString("type");
 					}
 					catch (JSONException e) {}
 
-					t.addVariable(new Variable(variableData.getString("name"),strata,priority));
+
+					double priority = 1.0;
+					try {
+						priority = variableData.getDouble("priority");
+					}
+					catch (JSONException e) {}	
+
+					t.addVariable(new Variable(variableData.getString("name"),type,strata,priority));
 				}
 			} 
 			else if (key.equals("default_arm")) {

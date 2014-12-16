@@ -15,12 +15,12 @@ public class BlockedRandomisation extends Randomisation {
 		super(trial, database);
 	}
 
-	protected Arm allocateHelper(String stratifiedEnum, List<Arm> openArms, Map<Arm, Integer> allocations) {
+	protected Arm allocateHelper(Participant participant, String stratifiedEnum, List<Arm> openArms, Map<Arm, Integer> allocations) {
 		int totalWeight = trial.getTotalWeight();
 		
-		int actualSize = (int) Math.round(parameters.get(getStatisticName("size", stratifiedEnum)));
-		long seed = Double.doubleToLongBits(parameters.get(getStatisticName("seed", stratifiedEnum)));
-		int counter = (int) Math.round(parameters.get(getStatisticName("counter", stratifiedEnum)));
+		int actualSize = (int) Math.round(getStatistic("", stratifiedEnum, "size"));
+		long seed = Double.doubleToLongBits(getStatistic("", stratifiedEnum, "seed"));
+		int counter = (int) Math.round(getStatistic("", stratifiedEnum, "counter"));
 		
 		List<Arm> block;
 		Arm arm = null;
@@ -36,8 +36,8 @@ public class BlockedRandomisation extends Randomisation {
 				double serialisedSeed = random.nextDouble();
 				seed = Double.doubleToLongBits(serialisedSeed);
 				
-				parameters.put(getStatisticName("size", stratifiedEnum), Double.valueOf(actualSize));
-				parameters.put(getStatisticName("seed", stratifiedEnum), serialisedSeed);
+				setStatistic("", stratifiedEnum, "size", Double.valueOf(actualSize));
+				setStatistic("", stratifiedEnum, "seed", serialisedSeed);
 
 				counter = 0;
 			}
@@ -59,7 +59,8 @@ public class BlockedRandomisation extends Randomisation {
 				}
 			}
 		}
-		parameters.put(getStatisticName("counter", stratifiedEnum), Double.valueOf(counter));
+
+		setStatistic("",stratifiedEnum, "counter", Double.valueOf(counter));
 		return arm;
 	}
 
@@ -74,12 +75,12 @@ public class BlockedRandomisation extends Randomisation {
 
 	@Override
 	protected void initialiseParameters(Trial trial) {
-		Map<String, Double> parameters = trial.getParameters();
+		/*Map<String, Double> parameters = trial.getParameters();
 		for (String strata: trial.getAllStrata()) {
 			parameters.put(getStatisticName("size", strata), 0.0);
 			parameters.put(getStatisticName("seed", strata), 0.0);
 			parameters.put(getStatisticName("counter", strata), 0.0);
-		}
+		}*/
 	}
 
 }

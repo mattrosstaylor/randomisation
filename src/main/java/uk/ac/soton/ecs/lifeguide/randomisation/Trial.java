@@ -81,7 +81,8 @@ public class Trial {
 		String result = "";
 		
 		boolean notFirst = false;
-		for (Variable variable : variables) {
+		for (Variable variable : getVariablesByType("stratification")) {
+
 			if (notFirst) {
 				result += ", ";
 			}
@@ -102,7 +103,7 @@ public class Trial {
 		result.add("");
 
 		boolean notFirst = false;
-		for (Variable variable : variables) {
+		for (Variable variable : getVariablesByType("stratification")) {
 			
 			List<String> newResult = new ArrayList<String>();
 
@@ -171,6 +172,16 @@ public class Trial {
 		}
 		return weight;
 	}
+
+	public List<Variable> getVariablesByType(String type) {
+		List<Variable> result = new ArrayList<Variable>();
+		for(Variable v: variables) {
+			if (v.getType() == null || v.getType().equals(type)) {
+				result.add(v);
+			}
+		}
+		return result;
+ 	}
 
 	/* getters and setters */
 
