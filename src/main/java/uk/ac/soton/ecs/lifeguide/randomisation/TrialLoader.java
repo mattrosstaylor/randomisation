@@ -101,5 +101,4 @@ public class TrialLoader{
 		t.setParameters(parameters);
 		return t;
 	}
-
 }

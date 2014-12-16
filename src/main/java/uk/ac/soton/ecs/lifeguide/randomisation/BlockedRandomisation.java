@@ -18,9 +18,9 @@ public class BlockedRandomisation extends Randomisation {
 	protected Arm allocateHelper(String stratifiedEnum, List<Arm> openArms, Map<Arm, Integer> allocations) {
 		int totalWeight = trial.getTotalWeight();
 		
-		int actualSize = (int) Math.round(statistics.get(getStatisticName("size", stratifiedEnum)));
-		long seed = Double.doubleToLongBits(statistics.get(getStatisticName("seed", stratifiedEnum)));
-		int counter = (int) Math.round(statistics.get(getStatisticName("counter", stratifiedEnum)));
+		int actualSize = (int) Math.round(parameters.get(getStatisticName("size", stratifiedEnum)));
+		long seed = Double.doubleToLongBits(parameters.get(getStatisticName("seed", stratifiedEnum)));
+		int counter = (int) Math.round(parameters.get(getStatisticName("counter", stratifiedEnum)));
 		
 		List<Arm> block;
 		Arm arm = null;
@@ -36,8 +36,8 @@ public class BlockedRandomisation extends Randomisation {
 				double serialisedSeed = random.nextDouble();
 				seed = Double.doubleToLongBits(serialisedSeed);
 				
-				statistics.put(getStatisticName("size", stratifiedEnum), Double.valueOf(actualSize));
-				statistics.put(getStatisticName("seed", stratifiedEnum), serialisedSeed);
+				parameters.put(getStatisticName("size", stratifiedEnum), Double.valueOf(actualSize));
+				parameters.put(getStatisticName("seed", stratifiedEnum), serialisedSeed);
 
 				counter = 0;
 			}
@@ -59,7 +59,7 @@ public class BlockedRandomisation extends Randomisation {
 				}
 			}
 		}
-		statistics.put(getStatisticName("counter", stratifiedEnum), Double.valueOf(counter));
+		parameters.put(getStatisticName("counter", stratifiedEnum), Double.valueOf(counter));
 		return arm;
 	}
 
@@ -73,17 +73,13 @@ public class BlockedRandomisation extends Randomisation {
 	}
 
 	@Override
-	protected Map<String, Double> getInitialisedStats(Trial trial) {
-		Map<String, Double> stats = new HashMap<String, Double>();
+	protected void initialiseParameters(Trial trial) {
+		Map<String, Double> parameters = trial.getParameters();
 		for (String strata: trial.getAllStrata()) {
-			stats.put(getStatisticName("size", strata), 0.0);
-			stats.put(getStatisticName("seed", strata), 0.0);
-			stats.put(getStatisticName("counter", strata), 0.0);
-			for (Arm a : trial.getArms()) {
-				stats.put(getAllocationStatisticName(a.getName(), strata), 0.0);
-			}
+			parameters.put(getStatisticName("size", strata), 0.0);
+			parameters.put(getStatisticName("seed", strata), 0.0);
+			parameters.put(getStatisticName("counter", strata), 0.0);
 		}
-		return stats;
 	}
 
 }

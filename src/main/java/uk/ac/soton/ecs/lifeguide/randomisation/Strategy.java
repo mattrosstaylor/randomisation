@@ -29,19 +29,18 @@ public abstract class Strategy {
 
 	protected final Trial trial;
 	protected final DataManager database;
-	protected final Map<String, Double> statistics;
 	protected final Map<String, Double> parameters;
 
 	public Strategy(Trial trial, DataManager database){
 		this.trial = trial;
 		this.database = database;
-		this.statistics = trial.getStatistics();
 		this.parameters = trial.getParameters();
 	}
 
 	protected abstract Arm allocate(Participant participant) throws PersistenceException;
 
-	protected abstract Map<String, Double> getInitialisedStats(Trial trial);
+	protected void initialiseParameters(Trial trial) {
+	};
 
 	protected String getAllocationStatisticName(String armName, String strataName) {
 		String result = armName +" allocations";
@@ -50,5 +49,16 @@ public abstract class Strategy {
 			result +=" (" +strataName +")";
 		} 
 		return result;
+	}
+
+	protected Double getAllocationStatistic(String armName, String strataName) {
+		String name = getAllocationStatisticName(armName, strataName);
+
+		if (parameters.containsKey(name)) {
+			return parameters.get(name);	
+		}
+		else {
+			return 0.0;
+		}
 	}
 }

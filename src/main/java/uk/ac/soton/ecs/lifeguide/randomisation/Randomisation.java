@@ -25,8 +25,8 @@ public abstract class Randomisation extends Strategy {
 		List<Arm> openArms = new ArrayList<Arm>();
 	
 		for (Arm a : trial.getArms()) {
-			String enumString = getAllocationStatisticName(a.getName(), stratifiedEnum);
-			Double strategyStatistic = statistics.get(enumString);
+			//String enumString = getAllocationStatisticName(a.getName(), stratifiedEnum);
+			Double strategyStatistic = getAllocationStatistic(a.getName(), stratifiedEnum);
 			int roundedVal = (int)(Math.round(strategyStatistic));
 			
 			if (roundedVal < a.getMaxParticipants()) {
@@ -42,7 +42,7 @@ public abstract class Randomisation extends Strategy {
 
 		Arm arm = allocateHelper(stratifiedEnum, openArms, allocations);
 
-		statistics.put(getAllocationStatisticName(arm.getName(), stratifiedEnum), Double.valueOf(allocations.get(arm) + 1));
+		parameters.put(getAllocationStatisticName(arm.getName(), stratifiedEnum), Double.valueOf(allocations.get(arm) + 1));
 		database.update(trial, participant, arm);
 		return arm;
 	}

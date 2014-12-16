@@ -60,7 +60,7 @@ public class DataManager {
 	}
 
 	public void registerTrial(Trial trial) throws PersistenceException, InvalidTrialException {
-		trial.setStatistics(Strategy.create(trial, this).getInitialisedStats(trial));
+		Strategy.create(trial, this).initialiseParameters(trial);
 
 		Transaction tx = null;
 		Integer generatedId = null;

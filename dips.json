@@ -1,0 +1,42 @@
+{
+	"method": "Minimisation",
+	"certainty": 0.8,
+	"arms": [
+		{ "name": "control", "weight": 1 },
+		{ "name": "study", "weight": 1 },
+	],
+	"minimisation_variables":[
+			{
+				"name":"blood_pressure",
+				"stata":[
+					{ "max":50 },
+					{ "min":50, "max":100 },
+					{ "min":100 }
+				]
+			},
+			{
+				"name":"ckd",
+				"strata":[
+					{ "value": "yes" },
+					{ "value": "no" }
+				]
+			},
+			{
+				"name":"diabetes",
+				"strata":[
+					{ "value": "yes" },
+					{ "value": "no" }
+				]
+			}
+	],
+	"stratification_variables": [
+		{
+			"name": "practice",
+			"strata": [
+				{ "value": "practice1" },
+				{ "value": "practice2" },
+				{ "value": "practice3" }
+			]
+		}
+	]
+}

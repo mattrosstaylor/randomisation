@@ -31,16 +31,4 @@ public class SimpleRandomisation extends Randomisation {
 
 		return arm;
 	}
-
-	@Override
-	protected Map<String, Double> getInitialisedStats(Trial trial) {
-		Map<String, Double> stats = new HashMap<String, Double>();
-		for (String strata : trial.getAllStrata()) {
-			for (Arm a : trial.getArms()) {
-				stats.put(getAllocationStatisticName(a.getName(), strata), 0.0);
-			}
-		}
-		return stats;
-	}
-
 }

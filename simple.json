@@ -5,5 +5,14 @@
 		{ "name":"study1", "weight":2 },
 		{ "name":"study2", "weight":2 }
 	],
-	"default_arm": "study2"
+	"default_arm": "study2",
+
+	"stratification_variables":[{
+		"name":"weight",
+		"strata":[
+			{ "max":50 },
+			{ "min":50, "max":100 },
+			{ "min":100 }
+		]
+	}]
 }

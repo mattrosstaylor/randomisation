@@ -24,7 +24,7 @@ public class Minimisation extends Strategy {
 		Map<Arm, Double> scores = new HashMap<Arm, Double>();
 
 		for (Arm arm: arms) {
-			if (trial.getStatistics().get(getAllocationStatisticName(arm.getName(), "")) < arm.getMaxParticipants()) {
+			if (trial.getParameters().get(getAllocationStatisticName(arm.getName(), "")) < arm.getMaxParticipants()) {
 
 				scores.put(arm, 0.0);
 
@@ -35,7 +35,7 @@ public class Minimisation extends Strategy {
 						variable, 
 						participant.getResponse(variable.getName())
 					);
-					Double stat = trial.getStatistics().get(get_string);
+					Double stat = trial.getParameters().get(get_string);
 
 					if (stat != null) {
 						scores.put(arm, scores.get(arm) + stat*variable.getWeight());
@@ -44,7 +44,6 @@ public class Minimisation extends Strategy {
 				scores.put(arm, scores.get(arm)/arm.getWeight());
 			}
 		}
-
 
 		List<Arm> smallestArms = new ArrayList<Arm>();  //List that stores the index of those scores which have same value
 		smallestArms.add(null); //Add the error return value to the list if there is something wrong happening
@@ -86,12 +85,12 @@ public class Minimisation extends Strategy {
 				variable,
 				participant.getResponse(variable.getName()));
 
-			trial.getStatistics().put(put_string, trial.getStatistics().get(put_string) + 1.0);
+			trial.getParameters().put(put_string, trial.getParameters().get(put_string) + 1.0);
 		}
 
-		trial.getStatistics().put(
+		trial.getParameters().put(
 			getAllocationStatisticName(arm.getName(),""),
-			trial.getStatistics().get(getAllocationStatisticName(arm.getName(),"")) + 1.0
+			trial.getParameters().get(getAllocationStatisticName(arm.getName(),"")) + 1.0
 		);
 		
 		database.update(trial, participant, arm);
@@ -106,17 +105,15 @@ public class Minimisation extends Strategy {
 
 
 	@Override
-	protected Map<String, Double> getInitialisedStats(Trial trial) {
-		Map<String, Double> stats = new HashMap<String, Double>();
+	protected void initialiseParameters(Trial trial) {
+		Map<String, Double> parameters = trial.getParameters();
 		for (Arm arm : trial.getArms()) {
-			stats.put(getAllocationStatisticName(arm.getName(), ""), 0.0);
 			for (Variable variable : trial.getVariables()) {
 				for (Stratum s : variable.getStrata()) {
 					String put_string = getStratStatString(arm, variable, s.getValidValue());
-					stats.put(put_string, 0.0);
+					parameters.put(put_string, 0.0);
 				}
 			}
 		}
-		return stats;
 	}
 }

@@ -42,12 +42,6 @@ public class Trial {
 	@Column(name="value") 
 	private Map<String, Double> parameters = new HashMap<String, Double>();
 
-	@CollectionOfElements(targetElement=java.lang.Double.class)
-	@JoinTable(name="statistics", joinColumns=@JoinColumn(name="trial_id"))
-	@MapKey(columns=@Column(name="name"))
-	@Column(name="value") 
-	private Map<String, Double> statistics = new HashMap<String, Double>();
-
 	/* constructor */
     
     public Trial() {}
@@ -150,16 +144,6 @@ public class Trial {
 			}
 		}
 
-		output += "\nStatistics: ";
-		if (statistics.size() == 0) {
-			output += "\nNone";
-		}
-		else {
-			for (String key : statistics.keySet()) {
-				output += "\n" + key + " = " + statistics.get(key);
-			}
-		}
-
 		output += "\nVariables: ";
 		if (variables.size() == 0) {
 			output +="\nNone";
@@ -213,7 +197,4 @@ public class Trial {
 
 	public Map<String, Double> getParameters() { return parameters; }
 	public void setParameters(Map<String, Double> parameters) { this.parameters = parameters; }
-
-	public Map<String, Double> getStatistics() { return statistics; }
-	public void setStatistics(Map<String, Double> statistics) { this.statistics = statistics; }
 }
