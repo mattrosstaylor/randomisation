@@ -5,9 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class Strategy {
 
@@ -27,6 +25,7 @@ public abstract class Strategy {
 		}
 	}
 
+	protected Random random = new Random();
 	protected final Trial trial;
 	protected final DataManager database;
 	protected final Map<String, Double> parameters;
@@ -37,44 +36,48 @@ public abstract class Strategy {
 		this.parameters = trial.getParameters();
 	}
 
-	protected abstract Arm allocate(Participant participant) throws PersistenceException;
+	protected Arm allocate(Participant participant) throws PersistenceException {
+		String stratifiedEnum = trial.getStrata(participant);
 
-	protected void initialiseParameters(Trial trial) {
-	};
+		Map<Arm, Integer> allocations = new HashMap<Arm, Integer>();
+		List<Arm> openArms = new ArrayList<Arm>();
+	
+		for (Arm a : trial.getArms()) {
+			Double strategyStatistic = getStatistic(stratifiedEnum, a.getName(), "allocations");
+			int roundedVal = (int)(Math.round(strategyStatistic));
+			
+			if (roundedVal < a.getMaxParticipants()) {
+				openArms.add(a);
+			}
+			allocations.put(a, roundedVal);
+		}
 
-	/*protected String getAllocationStatisticName(String armName, String strataName) {
-		String result = armName +" allocations";
-		
-		if (!strataName.equals("")) {
-			result +=" (" +strataName +")";
-		} 
-		return result;
+		if (openArms.isEmpty()) {
+			logger.debug("Trial full.");
+			return trial.getDefaultArm();
+		}
+
+		Arm arm = allocateHelper(participant, stratifiedEnum, openArms, allocations);
+		setStatistic(stratifiedEnum, arm.getName(), "allocations", Double.valueOf(allocations.get(arm) + 1));
+		database.update(trial, participant, arm);
+		return arm;
 	}
 
-	protected Double getAllocationStatistic(String armName, String strataName) {
-		String name = getAllocationStatisticName(armName, strataName);
+	protected abstract Arm allocateHelper(Participant participant, String stratifiedEnum, List<Arm> openArms, Map<Arm, Integer> allocations);
 
-		if (parameters.containsKey(name)) {
-			return parameters.get(name);	
-		}
-		else {
-			return 0.0;
-		}
-	}*/
-
-	protected String getStatisticString(String armName, String strataName, String statisticName) {
+	protected String getStatisticString(String strataName, String subName, String statisticName) {
 		String result = "";
 		if (!strataName.equals("")) {
 			result += "("+strataName+") ";
 		}
-		if (!armName.equals("")) {
-			result += armName +" ";
+		if (!subName.equals("")) {
+			result += subName +" ";
 		}
 		return result+statisticName;
 	}
 
-	protected Double getStatistic(String armName, String strataName, String statisticName) {
-		String name = getStatisticString(armName,strataName,statisticName);
+	protected Double getStatistic(String strataName, String subName, String statisticName) {
+		String name = getStatisticString(strataName, subName, statisticName);
 		if (parameters.containsKey(name)) {
 			return parameters.get(name);	
 		}
@@ -83,8 +86,8 @@ public abstract class Strategy {
 		}	
 	}
 
-	protected void setStatistic(String armName, String strataName, String statisticName, Double value) {
-		String name = getStatisticString(armName,strataName,statisticName);
+	protected void setStatistic(String strataName, String subName, String statisticName, Double value) {
+		String name = getStatisticString(strataName, subName, statisticName);
 		parameters.put(name, value);
 	}
 }

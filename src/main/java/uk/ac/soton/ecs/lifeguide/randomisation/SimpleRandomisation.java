@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class SimpleRandomisation extends Randomisation {
+public class SimpleRandomisation extends Strategy {
 
 	private static final Logger logger = LoggerFactory.getLogger(SimpleRandomisation.class);
 

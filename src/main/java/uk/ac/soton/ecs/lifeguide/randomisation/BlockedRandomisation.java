@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.util.*;
 
-public class BlockedRandomisation extends Randomisation {
+public class BlockedRandomisation extends Strategy {
 
 	private static final Logger logger = LoggerFactory.getLogger(BlockedRandomisation.class);
 
@@ -36,8 +36,8 @@ public class BlockedRandomisation extends Randomisation {
 				double serialisedSeed = random.nextDouble();
 				seed = Double.doubleToLongBits(serialisedSeed);
 				
-				setStatistic("", stratifiedEnum, "size", Double.valueOf(actualSize));
-				setStatistic("", stratifiedEnum, "seed", serialisedSeed);
+				setStatistic(stratifiedEnum, "", "size", Double.valueOf(actualSize));
+				setStatistic(stratifiedEnum, "", "seed", serialisedSeed);
 
 				counter = 0;
 			}
@@ -60,7 +60,7 @@ public class BlockedRandomisation extends Randomisation {
 			}
 		}
 
-		setStatistic("",stratifiedEnum, "counter", Double.valueOf(counter));
+		setStatistic(stratifiedEnum, "", "counter", Double.valueOf(counter));
 		return arm;
 	}
 
@@ -72,15 +72,4 @@ public class BlockedRandomisation extends Randomisation {
 		} 
 		return result;
 	}
-
-	@Override
-	protected void initialiseParameters(Trial trial) {
-		/*Map<String, Double> parameters = trial.getParameters();
-		for (String strata: trial.getAllStrata()) {
-			parameters.put(getStatisticName("size", strata), 0.0);
-			parameters.put(getStatisticName("seed", strata), 0.0);
-			parameters.put(getStatisticName("counter", strata), 0.0);
-		}*/
-	}
-
 }

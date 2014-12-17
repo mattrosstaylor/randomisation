@@ -22,9 +22,6 @@ public class Arm {
 	@Column(name="max_participants")
 	private int maxParticipants;
 
-	@Column(name="participant_limit")
-	private boolean participantLimit;
-
 	@Column(name="arm_order")
 	int armOrder;
 
@@ -41,12 +38,6 @@ public class Arm {
 		this.name = name;
 		this.weight = weight;
 		this.maxParticipants = maxParticipants;
-		if (this.maxParticipants < Integer.MAX_VALUE) {
-			this.participantLimit = true;
-		}
-		else {
-			this.participantLimit = false;
-		}
 	}
 	
 	/* methods */
@@ -54,8 +45,7 @@ public class Arm {
 	public String toString() {
 		String output = name + " ";
 		output += "(Weight: " + weight;
-		if (getParticipantLimit())
-			output += ", Limit: " + (maxParticipants == Integer.MAX_VALUE ? "none" : maxParticipants);
+		output += ", Limit: " + maxParticipants;
 		output += ")";
 		return output;
 	}
@@ -76,9 +66,6 @@ public class Arm {
 
 	public int getMaxParticipants() { return maxParticipants; }
 	public void setMaxParticipants(int maxParticipants) { this.maxParticipants = maxParticipants; }
-
-	public boolean getParticipantLimit() { return participantLimit; }
-	public void setParticipantLimit(boolean participantLimit) { this.participantLimit = participantLimit; }
 
 	public int getArmOrder() { return armOrder; }
 	public void setArmOrder(int armOrder) { this.armOrder = armOrder; }
