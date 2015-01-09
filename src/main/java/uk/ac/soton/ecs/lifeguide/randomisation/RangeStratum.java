@@ -64,8 +64,4 @@ public class RangeStratum extends Stratum {
 			return false;
 		}
 	}
-
-	public String getValidValue() {
-		return Double.toString(minimum);
-	}
 }

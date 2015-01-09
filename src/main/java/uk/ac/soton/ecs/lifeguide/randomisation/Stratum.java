@@ -43,8 +43,4 @@ public class Stratum {
 	public boolean inStratum(String s){
 		return name.equals(s);
 	}
-
-	public String getValidValue() {
-		return name;
-	}
 }
